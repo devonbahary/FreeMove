@@ -11,12 +11,14 @@
  * @desc    Max number of entities to allow in a QTree before partitioning into smaller Leaves.
  * @type    number
  * @default 2
+ * @min     1
  * @parent  QTree
  * 
  * @param   min Leaf size
  * @desc    the smallest dimension of a Leaf (height or width) that can be partitioned into
  * @type    number
  * @default 1
+ * @min     1
  * @parent  QTree
  * 
  * @param   display grid
@@ -41,9 +43,12 @@
  * @param   Characters
  * 
  * @param   character hitbox radius
- * @desc    default distance from center of characters used to calculate square hitbox
+ * @desc    default distance (in tiles) from center of characters used to calculate square hitbox
  * @type    number
+ * @decimals 1
  * @default 0.5
+ * @max     5
+ * @min     0.1
  * @parent  Characters
 */
 
