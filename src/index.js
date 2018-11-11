@@ -22,7 +22,7 @@
  * @parent  QTree
  * 
  * @param   display grid
- * @desc    Turn ON to display partition grid in-game. This is mostly for testing purposes.
+ * @desc    Turn ON to display partition grid (testing purposes).
  * @type    boolean
  * @default false
  * @parent  QTree
