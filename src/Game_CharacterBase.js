@@ -39,12 +39,22 @@ const _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers
 Game_CharacterBase.prototype.initMembers = function() {
   _Game_CharacterBase_initMembers.call(this);
   this._id = uuid();
+  this.resetAutoMovement();
   this._lastDir = 2;
 };
 
+Game_CharacterBase.prototype.resetAutoMovement = function() {
+  this._autoDx = this._autoDy = 0;
+};
+
+// 
+const _Game_CharacterBase_isMoving = Game_CharacterBase.prototype.isMoving;
+Game_CharacterBase.prototype.isMoving = function() {
+  return _Game_CharacterBase_isMoving.call(this) || this._autoDx || this._autoDy;
+};
 
 // based on pythagorean theorem
-Game_CharacterBase.prototype.diagonalDistancePerFrame = function() {
+Game_CharacterBase.prototype.distancePerFrameDiagonal = function() {
   return Math.round4(this.distancePerFrame() * Math.sqrt(2) / 2);
 };
 
@@ -92,12 +102,40 @@ Game_CharacterBase.prototype.update = function() {
 
 const _Game_CharacterBase_updateMove = Game_CharacterBase.prototype.updateMove;
 Game_CharacterBase.prototype.updateMove = function() {
-  const prevX = this._realX;
-  const prevY = this._realY;
-  _Game_CharacterBase_updateMove.call(this);
-  if (prevX !== this._realX || prevY !== this._realY) {
-    this.updateSpatialMap();
+  if (this._autoDx || this._autoDy) {
+    const distance = this.distancePerFrame();
+    const scalar = Math.abs(this._autoDx) + Math.abs(this._autoDy);
+    const dx = Math.round4(distance * this._autoDx / scalar);
+    const dy = Math.round4(distance * this._autoDy / scalar);
+    this._x += dx;
+    this._y += dy;
   }
+  _Game_CharacterBase_updateMove.call(this);
+};
+
+Game_CharacterBase.prototype.updateAutoMove = function(dx, dy) {
+  if (this._autoDx) {
+    if (Math.sign(this._autoDx) !== Math.sign(this._autoDx - dx)) this._autoDx = 0;
+    else this._autoDx -= dx;
+  }
+  if (this._autoDy) {
+    if (Math.sign(this._autoDy) !== Math.sign(this._autoDy - dy)) this._autoDy = 0;
+    else this._autoDy -= dy;
+  }
+};
+
+Game_CharacterBase.prototype.moveFree = function(dir) {
+  const distance = this.isDiagonal(dir) ? this.distancePerFrameDiagonal() : this.distancePerFrame();
+  const dx = this.isLeft(dir) ? -distance : this.isRight(dir) ? distance : 0;
+  const dy = this.isUp(dir) ? -distance : this.isDown(dir) ? distance : 0;
+  this.autoMove(dx, dy);
+};
+
+Game_CharacterBase.prototype.autoMove = function(dx, dy) {
+  if (!dx && !dy) return;
+  this.setDirection(this.dirFromDxDy(dx, dy));
+  this._autoDx = dx;
+  this._autoDy = dy;
 };
 
 // get hitbox dimensions
