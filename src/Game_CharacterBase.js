@@ -32,12 +32,14 @@ Object.defineProperties(Game_CharacterBase.prototype, {
 /*
   _id           : used in hash map in Game_Map to track characters in the spatial map
   _hitboxRadius : distance from center of characters used to calculate square hitbox
+  _lastDir        : used to determine appropriate 4-dir in 8-dir movement
 */
 const _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function() {
   _Game_CharacterBase_initMembers.call(this);
   this._id = uuid();
   this._hitboxRadius = Game_CharacterBase.DEFAULT_HITBOX_RADIUS;
+  this._lastDir = 2;
 };
 
 
@@ -46,6 +48,47 @@ Game_CharacterBase.prototype.diagonalDistancePerFrame = function() {
   return Math.round4(this.distancePerFrame() * Math.sqrt(2) / 2);
 };
 
+// accommodate 8-dir 
+Game_CharacterBase.prototype.setDirection = function(dir) {
+  if (this.isDirectionFixed() || !dir) return;
+  if (this._lastDir !== dir) {
+    if (this.isDiagonal(dir)) {
+      switch(this.direction()) {
+        case 2: // down 
+          if (this.isLeft(dir)) this._direction = 4;
+          else if (this.isRight(dir)) this._direction = 6;
+          break;
+        case 4: // left
+          if (this.isUp(dir)) this._direction = 8;
+          else if (this.isDown(dir)) this._direction = 2;
+          break;
+        case 6: // right
+          if (this.isUp(dir)) this._direction = 8;
+          else if (this.isDown(dir)) this._direction = 2;
+          break;
+        case 8: // up
+          if (this.isLeft(dir)) this._direction = 4;
+          else if (this.isRight(dir)) this._direction = 6;
+          break;
+      }
+    } else {
+      this._direction = dir;
+    }
+  }
+  this._lastDir = dir;
+  this.resetStopCount();
+};
+
+const _Game_CharacterBase_update = Game_CharacterBase.prototype.update;
+Game_CharacterBase.prototype.update = function() {
+  const prevX = this.x;
+  const prevY = this.y;
+  _Game_CharacterBase_update.call(this);
+  if (prevX !== this.x || prevY !== this.y) {
+    this.updateSpatialMap(this);
+    this.updateAutoMove(this.x - prevX, this.y - prevY);
+  }
+};
 
 const _Game_CharacterBase_updateMove = Game_CharacterBase.prototype.updateMove;
 Game_CharacterBase.prototype.updateMove = function() {
