@@ -30,8 +30,9 @@ Object.defineProperties(Game_CharacterBase.prototype, {
 });
 
 /*
-  _id           : used in hash map in Game_Map to track characters in the spatial map
-  _hitboxRadius : distance from center of characters used to calculate square hitbox
+  _id             : used in hash map in Game_Map to track characters in the spatial map
+  _autoDx         : movement determined in the x-axis
+  _autoDy         : movement determined in the y-axis
   _lastDir        : used to determine appropriate 4-dir in 8-dir movement
 */
 const _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
