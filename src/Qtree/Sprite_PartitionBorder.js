@@ -4,14 +4,15 @@
 // The sprite for displaying Sprite_Partition borders.
 
 
+Sprite_PartitionBorder.BORDER_THICKNESS = JSON.parse(PluginManager.parameters('FreeMove')['grid border thickness']);
+Sprite_PartitionBorder.BORDER_COLOR     = PluginManager.parameters('FreeMove')['grid border color'];
+
+
 function Sprite_PartitionBorder() {
   this.initialize.apply(this, arguments);
 }
 
 Sprite_PartitionBorder.prototype = Object.create(Sprite.prototype);
-
-Sprite_PartitionBorder.BORDER_THICKNESS = JSON.parse(PluginManager.parameters('FreeMove')['grid border thickness']);
-Sprite_PartitionBorder.BORDER_COLOR     = PluginManager.parameters('FreeMove')['grid border color'];
 
 Sprite_PartitionBorder.prototype.initialize = function(parent, index) {
   Sprite.prototype.initialize.call(this);

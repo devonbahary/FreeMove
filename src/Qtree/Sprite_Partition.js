@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Sprite_Partition
 //
-// The sprite class with a feature which displays animations.
+// The sprite class for QTree partitions.
 
 const Sprite_PartitionBorder = require('./Sprite_PartitionBorder');
 
