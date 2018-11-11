@@ -39,7 +39,6 @@ const _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers
 Game_CharacterBase.prototype.initMembers = function() {
   _Game_CharacterBase_initMembers.call(this);
   this._id = uuid();
-  this._hitboxRadius = Game_CharacterBase.DEFAULT_HITBOX_RADIUS;
   this._lastDir = 2;
 };
 
@@ -111,9 +110,7 @@ Game_CharacterBase.prototype.hitbox = function() {
   };
 };
 
-// used to determine hitbox dimensions
 Game_CharacterBase.prototype.hitboxRadius = function() {
-  return this.isTile() ? 0.5 : this._hitboxRadius;
 };
 
 Game_CharacterBase.prototype.updateSpatialMap = function() {
