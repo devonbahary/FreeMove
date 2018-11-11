@@ -8,6 +8,18 @@ const uuid = require('uuid');
 
 Game_CharacterBase.DEFAULT_HITBOX_RADIUS = Number(PluginManager.parameters('FreeMove')['character hitbox radius']) || 0.5;
 
+Game_CharacterBase.prototype.isDiagonal = dir => dir % 2 === 1;
+Game_CharacterBase.prototype.isLeft = dir => dir % 3 === 1;
+Game_CharacterBase.prototype.isRight = dir => dir % 3 === 0;
+Game_CharacterBase.prototype.isUp = dir => dir > 6;
+Game_CharacterBase.prototype.isDown = dir => dir < 4;
+Game_CharacterBase.prototype.dirFromDxDy = (dx, dy) => {
+  let dir = dx < 0 ? 4 : dx > 0 ? 6 : null;
+  if (dir) dir = dy > 0 ? dir - 3 : dy < 0 ? dir + 3 : dir;
+  else dir = dy > 0 ? 2 : dy < 0 ? 8 : null;
+  return dir;
+}
+
 
 Object.defineProperties(Game_CharacterBase.prototype, {
   id: { get: function() { return this._id          }, configurable: true },
