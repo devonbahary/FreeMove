@@ -9,3 +9,8 @@
 Game_Player.prototype.getInputDirection = function() {
   return Input.dir8;
 };
+
+// overwritten
+Game_Player.prototype.executeMove = function(direction) {
+  this.moveFree(direction);
+};
