@@ -1,60 +1,63 @@
 # FreeMove
 
-Does away with RPG Maker MV's 48px-based grid movement and introduces fluid, responsive movement in its place. 
+## Objective
+**RPG Maker MV** comes with a movement and collision system that fits well for its base use case: *non-continuous movement* on a grid with discrete jumps from one tile to another and smooth sprite movement across those tiles to facilitate that jump visually.
+
+**FreeMove** attempts to offer a solution for games that require more responsive controls and desire game objects to move on a spectrum about the game map.
 
 
-## Working With Existing Functionality
-In an effort to reduce incompatibility with other plugins, this plugin will attempt to work with the grain of the existing architecture instead of against it. Where mechanisms already exist, this plugin will attempt to modify them as minimally as possible, rather than invent new ways of doing things to circumvent existing systems entirely.
+## Features
 
-Understandably, this is a big undertaking because movement is a foundational pillar of RPG Maker MV.
+### Responsive Movement
+**RPG Maker MV**'s smallest unit of movement distance is `1 tile`. When the shortest distance you can travel is greater than the `distancePerFrame()`, the character spends **multiple frames** executing the movement.
 
+Base game movement is done in a cycle like so:
+ - the player inputs movement in a direction
+ - the `Game_Character` checks if movement is allowed into the adjacent tile in that direction
+ - if passable, the `Game_Character` changes its `.x` and `.y` to that of the target tile
+ - **WHILE** the character's `._realX`, `._realY` !== `._x`, `._y`
+     - increment `._realX`, `._realY` <= `distancePerFrame()`
+ - ^ repeat from top
 
-### Game_CharacterBase .x, .y, ._realX, ._realY
-`.x` and `.y` represent a character's coordinates on `Game_Map`. When a character is selected to move from one tile to another, it's (`.x`, `.y`) change instantly in one frame. 
+The player is locked into the last movement vector input until the character reaches the destination tile. 
 
-It's the job of `updateMoving()` to then adjust `._realX` and `._realY` frame-by-frame in increments of `distancePerFrame()` up to the point where `._realX` and `._realY` match the originally changed (`.x`, `.y`).
+**Game movement can't be responsive if the player can't change its movement vector as soon as new information is presented.**
+ 
+---
 
-`updateMoving()` is called every frame while `isMoving()` is `true`, which is when (`.x`, `.y`) !== `._realX`, `._realY`.
+### FreeMove
 
-## Movement Checks
-All movement is performed by the `Game_CharacterBase.moveInDirection(dir)` function.
+`moveFree(direction)` **changes the smallest unit of movement distance to `distancePerFrame()`**. In so doing, movement begins and ends in the same frame. 
 
-To better understand optimization, it should be noted that base RPG Maker MV performs movement 1 tile at a time, the movement occurs over many frames, and checks for collision happen only at the onset of movement. 
+This is the new movement loop (a single frame):
+ - the player inputs movement in a direction
+ - the character moves up to `distancePerFrame()` in that direction (limited by collision)
 
-Because a goal of **FreeMove** is responsiveness, movement is performed one frame at a time. This means the player can begin, change, or stop movement in any frame--essential for real-time combat. 
+**That's it.** The player chooses movement every frame.
 
-Unfortunately, this means checks have to occur at every frame instead of at the beginning of movement.
+---
 
-`Game_CharacterBase.moveInDirection(dir)` performs two checks:
-1. Checks for collision against tilemap.
-2. Checks for collision against other characters.
+### AutoMove
+> Any autonomous movement that happens without continous input either from the player or a Move Route can be implemented with `autoMove(dx, dy)`.
 
-### Tilemap Collisions
-One advantage of moving one frame at a time is that each movement interval crosses only a fraction of a tilemap grid cell in any frame. So even though we need to check for collision every frame, we can use a heuristic to only perform a check if the character actually crossed a new tilemap grid line.
+We retain the tile-to-tile movement capacity of base **RPG Maker MV** by using `autoMove(...)` in 1 unit increments.
 
-For example, we can imagine horizontal and vertical lines at every interval of x and y as in the tilemap editor. Characters traveling within any grid cell do not need to perform any tilemap collision checks; only when they approach a boundary to check if it is passable.
+For example, Move Routes in the base game are constituted of `moveStraight(direction)` commands, which move the character 1 tile in any direction.
 
-### Character Collision
-While we can use a heuristic with tiles because their location is fixed, we cannot use the same heuristic with characters, whose position we cannot assume.
+To replicate this behavior, we can use the following:
+ - `moveStraight(2)` -> `autoMove(0, -1)`
+ - `moveStraight(4)` -> `autoMove(-1, 0)`
+ - `moveStraight(6)` -> `autoMove(1, 0)`
+ - `moveStraight(8)` -> `autoMove(0, 1)`
 
-So unlike tilemap collision checks, we should expect to have to perform character collision checks every frame.
+In fact, the `moveStraight(...)` method is overwritten to execute just that.
 
-The heuristic must lie in only checking characters who are within proximity to the character. We can check every character on the map for AABB (Axis Aligned Bounding Box) overlap with the moving character, but that's an O(n) solution.
+We're not limited to 1 unit movements, however.
 
-With **Quadtrees**, however, we can store character positions according to the quadrant of the map they reside in. When we perform movement, we can determine the total bounding box that the movement would span, and check for characters that reside only within the quadrant(s) that spanning boundary box overlaps in the quadtree. We limit the number of character collision checks. 
+In order to get a character to move 8 tiles right across the map in the base game, we'd string together `moveStraight(6), moveStraight(6), moveStraight(6), ...` 8 times.
 
-## QTree
-When characters can occupy a spectrum of points along the map (and occupy a variable space themselves), collision checking calculations become much more complicated than the native `$gameMap.eventsXy(x, y)` calls to check one cell in the grid for a binary occupied / unoccupied state for collision checks.
+With `autoMove(...)`, we gain brevity and specificity: `autoMove(8, 0)`.
 
-`$gameMap.eventsXy(x, y)` doesn't suffice for this system for two reasons:
-  1. Characters can occupy an indeterminate space; checking one particular location doesn't tell you much about where this character actually is.
-  2. This is a O(n) call: it checks every event on the map to return a list of who's there at that point.
+## API 
 
-### Spatial Mapping
-The purpose of QTrees is to make collision checking more efficient. They are a tree of nodes that partition themselves into more nodes to accomodate densely spaced areas such that each node contains a threshold maximum of collision entities. 
-
-They aim to organize collision entities by proximity and attempt to do away with extraneous collision checking. Instead of narrowing the targets within reach of an entity by calculating the distance between each entity on the map and the interested entity, the acting entity can just check all units within its own or neighboring nodes.
-
-[Read more.](https://www.geeksforgeeks.org/quad-tree/)
-
-
+### `Game_CharacterBase.moveFree(direction)`
