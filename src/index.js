@@ -39,6 +39,18 @@
  * @default 1
  * @parent  QTree
  * 
+ * @param   display hitboxes
+ * @desc    Turn ON to display hitboxes (testing purposes).
+ * @type    boolean
+ * @default false
+ * @parent  QTree
+ * 
+ * @param   hitbox color
+ * @desc    Specify CSS hex color (e.g., "#ff4136") for hitboxes.
+ * @type    text
+ * @default red
+ * @parent  QTree
+ * 
  * 
  * @param   Characters
  * 
