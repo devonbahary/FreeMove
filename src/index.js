@@ -57,7 +57,7 @@
  * @param   character hitbox radius
  * @desc    default distance (in tiles) from center of characters used to calculate square hitbox
  * @type    number
- * @decimals 1
+ * @decimals 2
  * @default 0.5
  * @max     5
  * @min     0.1
