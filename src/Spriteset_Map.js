@@ -5,9 +5,11 @@
 
 const Sprite_Partition = require('./Qtree/Sprite_Partition');
 const Sprite_Hitbox = require('./Qtree/Sprite_Hitbox');
+const Sprite_Tile = require('./Qtree/Sprite_Tile');
 
 Spriteset_Map.DISPLAY_PARTITION_GRID = JSON.parse(PluginManager.parameters('FreeMove')['display grid']);
 Spriteset_Map.DISPLAY_HITBOXES = JSON.parse(PluginManager.parameters('FreeMove')['display hitboxes']);
+Spriteset_Map.DISPLAY_TILES = JSON.parse(PluginManager.parameters('FreeMove')['display collision tiles']);
 
 
 const _Spriteset_Map_createLowerLayer = Spriteset_Map.prototype.createLowerLayer;
@@ -15,6 +17,7 @@ Spriteset_Map.prototype.createLowerLayer = function() {
   _Spriteset_Map_createLowerLayer.call(this);
   if (Spriteset_Map.DISPLAY_PARTITION_GRID) this.createQTree();
   if (Spriteset_Map.DISPLAY_HITBOXES) this.createHitboxes();
+  if (Spriteset_Map.DISPLAY_TILES) this.createCollisionTiles();
 };
 
 // create first partition sprite
@@ -31,4 +34,10 @@ Spriteset_Map.prototype.createHitboxes = function() {
 
   this._hitboxSprites = entities.map(character => new Sprite_Hitbox(character));
   this._hitboxSprites.forEach(hitboxSprite => this.addChild(hitboxSprite));
+};
+
+Spriteset_Map.prototype.createCollisionTiles = function() {
+  $gameMap._collisionObjects.forEach(collisionObject => {
+    this.addChild(new Sprite_Tile(collisionObject));
+  });
 };

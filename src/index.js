@@ -51,6 +51,18 @@
  * @default red
  * @parent  QTree
  * 
+ * @param   display collision tiles
+ * @desc    Turn ON to display collision tiles (testing purposes).
+ * @type    boolean
+ * @default false
+ * @parent  QTree
+ * 
+ * @param   tile color
+ * @desc    Specify CSS hex color (e.g., "#ff4136") for tiles.
+ * @type    text
+ * @default blue
+ * @parent  QTree
+ * 
  * 
  * @param   Characters
  * 
