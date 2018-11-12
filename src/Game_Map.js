@@ -5,7 +5,7 @@
 // determination functions.
 
 const QTree = require('./Qtree');
-
+const Game_CollisionObject = require('./Qtree/Game_CollisionObject');
 
 // create new spatial map for each new map
 const _Game_Map_setup = Game_Map.prototype.setup;
@@ -20,8 +20,54 @@ Game_Map.prototype.initSpatialMap = function() {
     entityHash: {}
   };
 
+  this._collisionObjects = this.getTilemapCollisionObjects();
+
   const addEntities = [ $gamePlayer, ...$gamePlayer.followers()._data, ...this.events(), ...this.vehicles() ];
   addEntities.forEach(entity => this.spatialMapAddEntity(entity));
+};
+
+Game_Map.prototype.getTilemapCollisionObjects = function() {
+  const tilemapProperty2DArray = [];
+  for (let y = 0; y < $gameMap.height(); y++) {
+    tilemapProperty2DArray.push([]);
+    for (let x = 0; x < $gameMap.width(); x++) {
+      const tile = {
+        2: this.isValid(x, y - 1) && this.isPassable(x, y, 2),
+        4: this.isValid(x - 1, y) && this.isPassable(x, y, 4),
+        6: this.isValid(x + 1, y) && this.isPassable(x, y, 6),
+        8: this.isValid(x, y + 1) && this.isPassable(x, y, 8)
+      };
+      tilemapProperty2DArray[y].push(tile);
+    }
+  }
+
+  const collisionTiles2DArray = [];
+  for (let y = 0; y < $gameMap.height(); y++) {
+    collisionTiles2DArray.push([]);
+    for (let x = 0; x < $gameMap.width(); x++) {
+      collisionTiles2DArray[y].push(Object.values(tilemapProperty2DArray[y][x]).some(property => property));
+    }
+  }
+
+  const collisionObjects = [];
+  for (let y = 0; y < $gameMap.height(); y++) {
+    for (let x = 0; x < $gameMap.width(); x++) {
+      if (!collisionTiles2DArray[y][x]) {
+        if (collisionObjects.length) {
+          const lastObject = collisionObjects[collisionObjects.length - 1];
+          if (lastObject.x2 === x) {
+            lastObject.x2 += 1;
+            continue;
+          }
+        }
+        collisionObjects.push(new Game_CollisionObject(x, x + 1, y, y + 1));
+      }
+    }
+  }
+
+  console.log(collisionObjects)
+
+  return collisionObjects;
 };
 
 // update spatial map 
