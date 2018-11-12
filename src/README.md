@@ -1,5 +1,13 @@
 # FreeMove
 
+### To-do
+ - tiles into QTree
+ - collision: characters 
+ - collision: tiles
+ - new movement with autoMove (`moveStraight()`)
+
+---
+
 ## Objective
 **RPG Maker MV** comes with a movement and collision system that fits well for its base use case: *non-continuous movement* on a grid with discrete jumps from one tile to another and smooth sprite movement across those tiles to facilitate that jump visually.
 
