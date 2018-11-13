@@ -29,6 +29,7 @@ Game_Map.prototype.initSpatialMap = function() {
 };
 
 Game_Map.prototype.getTilemapCollisionObjects = function() {
+  // get grid tile properties
   const tilemapProperty2DArray = [];
   for (let y = 0; y < $gameMap.height(); y++) {
     tilemapProperty2DArray.push([]);
@@ -43,6 +44,7 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
     }
   }
 
+  // find entirely impassable tiles
   const collisionTiles2DArray = [];
   for (let y = 0; y < $gameMap.height(); y++) {
     collisionTiles2DArray.push([]);
@@ -52,6 +54,7 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
     }
   }
 
+  // create impassable tile collision objects
   const collisionObjects = [];
   for (let y = 0; y < $gameMap.height(); y++) {
     for (let x = 0; x < $gameMap.width(); x++) {
@@ -94,6 +97,7 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
     }
   }
 
+  // trim collision objects such that none overlap (minimize total surface area)
   collisionObjects.forEach(objectA => {
     let overlapX1, overlapX2;
     for (let spanX = objectA.x1; spanX < objectA.x2; spanX++) {
