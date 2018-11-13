@@ -34,10 +34,10 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
     tilemapProperty2DArray.push([]);
     for (let x = 0; x <= $gameMap.width(); x++) {
       const tile = {
-        2: this.isValid(x, y - 1) && this.isPassable(x, y, 2),
+        2: this.isValid(x, y + 1) && this.isPassable(x, y, 2),
         4: this.isValid(x - 1, y) && this.isPassable(x, y, 4),
         6: this.isValid(x + 1, y) && this.isPassable(x, y, 6),
-        8: this.isValid(x, y + 1) && this.isPassable(x, y, 8)
+        8: this.isValid(x, y - 1) && this.isPassable(x, y, 8)
       };
       tilemapProperty2DArray[y].push(tile);
     }
