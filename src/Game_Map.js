@@ -126,6 +126,31 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
     }
   });
 
+  
+  // get tile border collision objects (one-way impassability)
+  for (let y = 0; y < $gameMap.height(); y++) {
+    for (let x = 0; x < $gameMap.width(); x++) {
+      const tileProperties = tilemapProperty2DArray[y][x];
+      if (!Object.values(tileProperties).some(passability => passability)) continue;
+
+      Object.keys(tileProperties)
+        .filter(dir => !tileProperties[dir])
+        .forEach(dir => {
+          const thickness = Game_Map.TILE_BORDER_THICKNESS;
+          switch(Number(dir)) {
+            case 2:
+              return collisionObjects.push({ x1: x, x2: x + 1, y1: y + 1 - thickness, y2: y + 1});
+            case 4:
+              return collisionObjects.push({ x1: x, x2: x + thickness, y1: y, y2: y + 1 });
+            case 6:
+              return collisionObjects.push({ x1: x + 1 - thickness, x2: x + 1, y1: y, y2: y + 1 });
+            case 8:
+              return collisionObjects.push({ x1: x, x2: x + 1, y1: y, y2: y + thickness});
+          }
+        });
+    }
+  }
+  
   return collisionObjects;
 };
 
