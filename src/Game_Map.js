@@ -6,6 +6,9 @@
 
 const QTree = require('./Qtree');
 
+Game_Map.TILE_BORDER_THICKNESS = Number(PluginManager.parameters('FreeMove')['tile border thickness']) || 0.1;
+
+
 // create new spatial map for each new map
 const _Game_Map_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {

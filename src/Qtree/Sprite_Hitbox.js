@@ -4,7 +4,7 @@
 // The sprite class for character hitboxes
 
 
-Sprite_Hitbox.HITBOX_COLOR     = PluginManager.parameters('FreeMove')['hitbox color'];
+Sprite_Hitbox.HITBOX_COLOR     = PluginManager.parameters('FreeMove')['hitbox color'] || 'blue';
 
 function Sprite_Hitbox() {
   this.initialize.apply(this, arguments);

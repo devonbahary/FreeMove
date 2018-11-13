@@ -7,20 +7,6 @@
  * 
  * @param  QTree
  * 
- * @param   max entities
- * @desc    Max number of entities to allow in a QTree before partitioning into smaller Leaves.
- * @type    number
- * @default 2
- * @min     1
- * @parent  QTree
- * 
- * @param   min Leaf size
- * @desc    the smallest dimension of a Leaf (height or width) that can be partitioned into
- * @type    number
- * @default 1
- * @min     1
- * @parent  QTree
- * 
  * @param   display grid
  * @desc    Turn ON to display partition grid (testing purposes).
  * @type    boolean
@@ -30,41 +16,69 @@
  * @param   grid border color
  * @desc    Specify CSS hex color (e.g., "#ff4136") for partition grid lines.
  * @type    text
- * @default #ff4136
+ * @default blue
  * @parent  QTree
  * 
  * @param   grid border thickness
  * @desc    Specify thickness of grid lines (in pixels).
  * @type    number
+ * @default 4
+ * @parent  QTree
+ * 
+ * @param   max entities
+ * @desc    Max number of entities to allow in a QTree before partitioning into smaller Leaves.
+ * @type    number
+ * @default 2
+ * @min     1
+ * @parent  QTree
+ * 
+ * @param   min Leaf size
+ * @desc    The smallest dimension (width/height) a Leaf can be reduced to in tiles/
+ * @type    number
  * @default 1
+ * @min     1
  * @parent  QTree
  * 
- * @param   display hitboxes
- * @desc    Turn ON to display hitboxes (testing purposes).
- * @type    boolean
- * @default false
- * @parent  QTree
  * 
- * @param   hitbox color
- * @desc    Specify CSS hex color (e.g., "#ff4136") for hitboxes.
- * @type    text
- * @default red
- * @parent  QTree
+ * 
+ * @param   Tilemap
  * 
  * @param   display collision tiles
  * @desc    Turn ON to display collision tiles (testing purposes).
  * @type    boolean
  * @default false
- * @parent  QTree
+ * @parent  Tilemap
  * 
  * @param   tile color
  * @desc    Specify CSS hex color (e.g., "#ff4136") for tiles.
  * @type    text
- * @default blue
- * @parent  QTree
+ * @default #ff4136
+ * @parent  Tilemap
+ * 
+ * @param   tile border thickness
+ * @desc    Thickness of a tile border that is impassable (shorter distances allow characters to move closer to edge).
+ * @type    number
+ * @decimals 2
+ * @default 0.1
+ * @max     0.5
+ * @min     0.05
+ * @parent  Tilemap
+ * 
  * 
  * 
  * @param   Characters
+ * 
+ * @param   display hitboxes
+ * @desc    Turn ON to display hitboxes (testing purposes).
+ * @type    boolean
+ * @default false
+ * @parent  Characters
+ * 
+ * @param   hitbox color
+ * @desc    Specify CSS hex color (e.g., "#ff4136") for hitboxes.
+ * @type    text
+ * @default blue
+ * @parent  Characters
  * 
  * @param   character hitbox radius
  * @desc    default distance (in tiles) from center of characters used to calculate square hitbox
@@ -74,6 +88,7 @@
  * @max     5
  * @min     0.1
  * @parent  Characters
+ * 
 */
 
 Math.round4 = number => Math.round(number * 10000) / 10000;
