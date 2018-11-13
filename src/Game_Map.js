@@ -30,7 +30,7 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
   const tilemapProperty2DArray = [];
   for (let y = 0; y < $gameMap.height(); y++) {
     tilemapProperty2DArray.push([]);
-    for (let x = 0; x < $gameMap.width(); x++) {
+    for (let x = 0; x <= $gameMap.width(); x++) {
       const tile = {
         2: this.isValid(x, y - 1) && this.isPassable(x, y, 2),
         4: this.isValid(x - 1, y) && this.isPassable(x, y, 4),
@@ -44,28 +44,86 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
   const collisionTiles2DArray = [];
   for (let y = 0; y < $gameMap.height(); y++) {
     collisionTiles2DArray.push([]);
-    for (let x = 0; x < $gameMap.width(); x++) {
-      collisionTiles2DArray[y].push(Object.values(tilemapProperty2DArray[y][x]).some(property => property));
+    for (let x = 0; x <= $gameMap.width(); x++) {
+      // 1 is a collision tile, 0 is a passable tile
+      collisionTiles2DArray[y].push(Object.values(tilemapProperty2DArray[y][x]).some(property => property) ? 0 : 1);
     }
   }
 
   const collisionObjects = [];
   for (let y = 0; y < $gameMap.height(); y++) {
     for (let x = 0; x < $gameMap.width(); x++) {
-      if (!collisionTiles2DArray[y][x]) {
-        if (collisionObjects.length) {
-          const lastObject = collisionObjects[collisionObjects.length - 1];
-          if (lastObject.x2 === x) {
-            lastObject.x2 += 1;
-            continue;
+      if (collisionTiles2DArray[y][x]) {
+        const potentialObject = {
+          x1: x,
+          x2: null,
+          y1: y,
+          y2: null
+        };
+        spanObject:
+          for (let spanY = y; spanY < $gameMap.height(); spanY++) {
+            // span right 
+            for (let spanX = x; spanX <= $gameMap.width(); spanX++) {
+              if (potentialObject.x2 && spanX > potentialObject.x2) break spanObject;
+              if (!$gameMap.isValid(spanX, spanY) || !collisionTiles2DArray[spanY][spanX]) {
+                if (!potentialObject.x2) potentialObject.x2 = spanX;
+                if (potentialObject.x2 === spanX) potentialObject.y2 = spanY + 1;
+                if (spanX < potentialObject.x2) break spanObject;
+                break;
+              } 
+            }
           }
+        
+        let coveredNewGround = false;
+        checkForNewGround:
+          for (let spanY = potentialObject.y1; spanY < potentialObject.y2; spanY++) {
+            for (let spanX = potentialObject.x1; spanX < potentialObject.x2; spanX++) {
+              if (collisionTiles2DArray[spanY][spanX] === 1) {
+                coveredNewGround = true;
+              }
+              collisionTiles2DArray[spanY][spanX] = 2;
+            }
+          }
+        
+        if (coveredNewGround) {
+          collisionObjects.push(potentialObject);
         }
-        collisionObjects.push(new Game_CollisionObject(x, x + 1, y, y + 1));
       }
     }
   }
 
-  console.log(collisionObjects)
+  collisionObjects.forEach(objectA => {
+    let overlapX1, overlapX2;
+    for (let spanX = objectA.x1; spanX < objectA.x2; spanX++) {
+      let entireColumnOverlapped = true;
+      for (let spanY = objectA.y1; spanY < objectA.y2; spanY++) {
+        if (!collisionObjects.filter(objectB => objectB !== objectA).some(objectB => spanX >= objectB.x1 && spanX < objectB.x2 && spanY >= objectB.y1 && spanY < objectB.y2)) {
+          entireColumnOverlapped = false;
+          break;
+        } 
+      }
+      if (entireColumnOverlapped && !overlapX1) {
+        overlapX1 = spanX;
+        overlapX2 = spanX + 1;
+      }
+      else if (entireColumnOverlapped && overlapX2) overlapX2++;
+      else if (!entireColumnOverlapped && overlapX1) {
+        if (overlapX1 === objectA.x1) {
+          objectA.x1 = overlapX2;
+          break;
+        }
+      }
+      if (overlapX2 === objectA.x2) {
+        objectA.x2 = overlapX1;
+        break;
+      }
+    }
+  });
+
+  const tileCoverage = collisionObjects 
+    .map(object => (object.x2 - object.x1) * (object.y2 - object.y1))
+    .reduce((total, coverage) => total + coverage, 0);
+  console.log(`collisionObjects: ${collisionObjects.length} | tileCoverage: ${tileCoverage}`);
 
   return collisionObjects;
 };
