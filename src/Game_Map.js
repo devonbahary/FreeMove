@@ -5,7 +5,6 @@
 // determination functions.
 
 const QTree = require('./Qtree');
-const Game_CollisionObject = require('./Qtree/Game_CollisionObject');
 
 // create new spatial map for each new map
 const _Game_Map_setup = Game_Map.prototype.setup;
