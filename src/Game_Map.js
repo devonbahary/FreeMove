@@ -126,11 +126,6 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
     }
   });
 
-  const tileCoverage = collisionObjects 
-    .map(object => (object.x2 - object.x1) * (object.y2 - object.y1))
-    .reduce((total, coverage) => total + coverage, 0);
-  console.log(`collisionObjects: ${collisionObjects.length} | tileCoverage: ${tileCoverage}`);
-
   return collisionObjects;
 };
 
