@@ -28,7 +28,6 @@ Sprite_Tile.prototype.setTile = function(tile) {
   this.bitmap.paintOpacity = 125;
   if (Sprite_Tile.TILE_COLOR === 'random') this.bitmap.fillAll(randomColor());
   else this.bitmap.fillAll(Sprite_Tile.TILE_COLOR);
-  
 };
 
 Sprite_Tile.prototype.update = function() {
