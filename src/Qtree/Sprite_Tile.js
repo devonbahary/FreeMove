@@ -26,8 +26,9 @@ Sprite_Tile.prototype.setTile = function(tile) {
   this.height = $gameMap.tileHeight() * (tile.y2 - tile.y1);
   this.bitmap = new Bitmap(this.width, this.height);
   this.bitmap.paintOpacity = 125;
-  this.bitmap.fillAll(Sprite_Tile.TILE_COLOR);
-  // this.bitmap.fillAll(randomColor());
+  if (Sprite_Tile.TILE_COLOR === 'random') this.bitmap.fillAll(randomColor());
+  else this.bitmap.fillAll(Sprite_Tile.TILE_COLOR);
+  
 };
 
 Sprite_Tile.prototype.update = function() {

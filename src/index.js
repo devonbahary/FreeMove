@@ -50,7 +50,7 @@
  * @parent  Tilemap
  * 
  * @param   tile color
- * @desc    Specify CSS hex color (e.g., "#ff4136") for tiles.
+ * @desc    Specify CSS hex color (e.g., "#ff4136") for tiles. Use 'random' to view individual tiles.
  * @type    text
  * @default #ff4136
  * @parent  Tilemap
