@@ -5,6 +5,7 @@
  - collision: characters 
  - collision: tiles
  - new movement with autoMove (`moveStraight()`)
+ - change how autoMove is subtracted
 
 ---
 
@@ -65,6 +66,33 @@ We're not limited to 1 unit movements, however.
 In order to get a character to move 8 tiles right across the map in the base game, we'd string together `moveStraight(6), moveStraight(6), moveStraight(6), ...` 8 times.
 
 With `autoMove(...)`, we gain brevity and specificity: `autoMove(8, 0)`.
+
+--- 
+
+## Collision Properties
+
+![collision objects on the map](./assets/tilemap.png)
+
+### Tilemap
+Fully impassable tiles exist as 1x1 (48px-by-48px) collision objects on the tilemap. One-directional impassability is represented by a 0.1-thick (~5px) border within that tile.
+
+### Characters 
+Characters can have variable hitbox dimensions, specified by the `hitboxRadius` which is used to calculate their square hitbox dimensions. 
+
+
+### Events
+Enter the meta tag `<hitbox: x.x>` in an Event's **Note** to specify a particular `hitboxRadius` for the Event. 
+
+Enter the same tag in a page's Event Command **Comment** to specify a particular `hitboxRadius` for the Event on a page-level. This will override the **Note** meta tag.
+
+### Plugin Parameters
+ - `display collision tiles` | Turn ON to display collision tiles (testing purposes).
+- `tile color` | Specify CSS hex color (e.g., "#ff4136") for tiles. Use 'random' to view individual tiles.
+- `display hitboxes` | Turn ON to display hitboxes (testing purposes).
+- `hitbox color` | Specify CSS hex color (e.g., "#ff4136") for hitboxes.
+- `character hitbox radius` | Default distance (in tiles) from center of characters used to calculate square hitbox.
+
+---
 
 ## API 
 
