@@ -38,7 +38,7 @@ Sprite_Hitbox.prototype.update = function() {
 Sprite_Hitbox.prototype.updatePosition = function() {
   if (!this._character) return;
   this.x = this._character.screenX();
-  this.y = this._character.screenY() + this._character.shiftY();
+  this.y = this._character.screenY();
 };
 
 module.exports = Sprite_Hitbox;
