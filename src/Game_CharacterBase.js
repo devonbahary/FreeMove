@@ -34,6 +34,7 @@ Object.defineProperties(Game_CharacterBase.prototype, {
   _autoDx         : movement determined in the x-axis
   _autoDy         : movement determined in the y-axis
   _lastDir        : used to determine appropriate 4-dir in 8-dir movement
+  _hitboxRadius   : used to calculate square hitbox dimensions
 */
 const _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function() {
@@ -41,6 +42,7 @@ Game_CharacterBase.prototype.initMembers = function() {
   this._id = uuid();
   this.resetAutoMovement();
   this._lastDir = 2;
+  this._hitboxRadius = this.hitboxRadius();
 };
 
 Game_CharacterBase.prototype.resetAutoMovement = function() {
@@ -143,14 +145,14 @@ Game_CharacterBase.prototype.hitbox = function() {
   return {
     x1: this.x + 0.5 - this.hitboxRadius(),
     x2: this.x + 0.5 + this.hitboxRadius(),
-    y1: this.y + 0.5 - this.hitboxRadius(),
-    y2: this.y + 0.5 + this.hitboxRadius(),
+    y1: this.y + 1 - this.hitboxRadius() * 2,
+    y2: this.y + 1,
   };
 };
 
 // distance from center of characters used to calculate square hitbox
 Game_CharacterBase.prototype.hitboxRadius = function() {
-  return this.isTile() ? 0.5 : Game_CharacterBase.DEFAULT_HITBOX_RADIUS;
+  return this.isTile() || this.isObjectCharacter() ? 0.5 : this._hitboxRadius || Game_CharacterBase.DEFAULT_HITBOX_RADIUS;
 };
 
 Game_CharacterBase.prototype.updateSpatialMap = function() {
