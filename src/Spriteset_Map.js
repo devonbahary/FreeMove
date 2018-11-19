@@ -37,7 +37,7 @@ Spriteset_Map.prototype.createHitboxes = function() {
 };
 
 Spriteset_Map.prototype.createCollisionTiles = function() {
-  $gameMap._collisionObjects.forEach(collisionObject => {
+  $gameMap._tilemapCollisionObjects.forEach(collisionObject => {
     this.addChild(new Sprite_Tile(collisionObject));
   });
 };

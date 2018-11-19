@@ -6,7 +6,7 @@
 
 const QTree = require('./Qtree');
 
-Game_Map.TILE_BORDER_THICKNESS = Number(PluginManager.parameters('FreeMove')['tile border thickness']) || 0.1;
+Game_Map.TILE_BORDER_THICKNESS = 0.05;
 
 
 // create new spatial map for each new map
@@ -14,6 +14,7 @@ const _Game_Map_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
   _Game_Map_setup.call(this, mapId);
   this.initSpatialMap();
+  this.initTilemapCollisionGrid();
 };
 
 Game_Map.prototype.initSpatialMap = function() {
@@ -22,10 +23,47 @@ Game_Map.prototype.initSpatialMap = function() {
     entityHash: {}
   };
 
-  this._collisionObjects = this.getTilemapCollisionObjects();
-
   const addEntities = [ $gamePlayer, ...$gamePlayer.followers()._data, ...this.events(), ...this.vehicles() ];
   addEntities.forEach(entity => this.spatialMapAddEntity(entity));
+};
+
+Game_Map.prototype.initTilemapCollisionGrid = function() {
+  this._tilemapCollisionObjects = this.getTilemapCollisionObjects();
+  this._tilemapCollisionGrid = this.getTilemapCollisionGrid(this._tilemapCollisionObjects);
+};
+
+// add entity to the spatial map
+Game_Map.prototype.spatialMapAddEntity = function(entity) {
+  if (!this._spatialMap || this.isEntityInSpatialMap(entity)) return;
+  if (entity instanceof Game_Follower && !entity.isVisible) return;
+  if (entity instanceof Game_Vehicle && entity.isTransparent()) return;
+  this._spatialMap.entityHash[entity.id] = true;
+  this._spatialMap.qTree.addEntity(entity);
+};
+
+// updates entity position in spatial map
+Game_Map.prototype.spatialMapUpdateEntity = function(entity) {
+  if (this._spatialMap && this.isEntityInSpatialMap(entity)) this._spatialMap.qTree.updateEntity(entity);
+};
+
+// removes char from the spatial map and entity hash
+Game_Map.prototype.spatialMapRemoveEntity = function(entity) {
+  if (this._spatialMap && this.isEntityInSpatialMap(entity)) {
+    this._spatialMap.qTree.removeEntity(entity);
+    delete this._spatialMap.entityHash[entity.id];
+  }
+};
+
+// determines if entity is on the spatial map
+Game_Map.prototype.isEntityInSpatialMap = function(entity) {
+  return this._spatialMap && this._spatialMap.entityHash[entity.id];
+};
+
+// get entities within a given bounding box in spatial map
+Game_Map.prototype.spatialMapEntitiesInBoundingBox = function(minX, maxX, minY, maxY) {
+  const entities = [];
+  this._spatialMap.qTree.entitiesInBoundingBox(entities, minX, maxX, minY, maxY);
+  return entities;
 };
 
 Game_Map.prototype.getTilemapCollisionObjects = function() {
@@ -154,43 +192,44 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
   return collisionObjects;
 };
 
+Game_Map.prototype.getTilemapCollisionGrid = function(tilemapCollisionObjects) {
+  const tilemapCollisionGrid = {};
+  for (let y = 0; y < $gameMap.height(); y++) {
+    tilemapCollisionGrid[y] = {};
+    for (let x = 0; x < $gameMap.width(); x++) {
+      const overlappingCollisionObjects = tilemapCollisionObjects.filter(object => object.x1 < x + 1 && object.x2 > x && object.y1 < y + 1 && object.y2 > y);
+      tilemapCollisionGrid[y][x] = overlappingCollisionObjects;
+    }
+  }
+  return tilemapCollisionGrid;
+};
+
+Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y) {
+  if (!$gameMap.isValid(x)) x = Math.max(0, Math.min(x, $gameMap.width() - 1));
+  if (!$gameMap.isValid(y)) y = Math.max(0, Math.min(y, $gameMap.height() - 1));
+  return this._tilemapCollisionGrid[y][x];
+};
+
+Game_Map.prototype.tilemapCollisionObjectsInBoundingBox = function(minX, maxX, minY, maxY) {
+  let collisionObjects = [];
+  for (let x = Math.floor(minX); x <= Math.floor(maxX); x++) {
+    for (let y = Math.floor(minY); y <= Math.floor(maxY); y++) {
+      collisionObjects = [ ...collisionObjects, ...this.getTilemapCollisionObjectsAtPos(x, y) ]; 
+    }
+  }
+  return collisionObjects;
+};
+
+Game_Map.prototype.collisionsInBoundingBox = function(minX, maxX, minY, maxY) {
+  return [
+    ...this.spatialMapEntitiesInBoundingBox(minX, maxX, minY, maxY),
+    ...this.tilemapCollisionObjectsInBoundingBox(minX, maxX, minY, maxY)
+  ];
+};
+
 // update spatial map 
 const _Game_Map_update = Game_Map.prototype.update;
 Game_Map.prototype.update = function(sceneActive) {
   _Game_Map_update.call(this, sceneActive);
   this._spatialMap.qTree.update();
-};
-
-// add entity to the spatial map
-Game_Map.prototype.spatialMapAddEntity = function(entity) {
-  if (!this._spatialMap || this.isEntityInSpatialMap(entity)) return;
-  if (entity instanceof Game_Follower && !entity.isVisible) return;
-  if (entity instanceof Game_Vehicle && entity.isTransparent()) return;
-  this._spatialMap.entityHash[entity.id] = true;
-  this._spatialMap.qTree.addEntity(entity);
-};
-
-// updates entity position in spatial map
-Game_Map.prototype.spatialMapUpdateEntity = function(entity) {
-  if (this._spatialMap && this.isEntityInSpatialMap(entity)) this._spatialMap.qTree.updateEntity(entity);
-};
-
-// removes char from the spatial map and entity hash
-Game_Map.prototype.spatialMapRemoveEntity = function(entity) {
-  if (this._spatialMap && this.isEntityInSpatialMap(entity)) {
-    this._spatialMap.qTree.removeEntity(entity);
-    delete this._spatialMap.entityHash[entity.id];
-  }
-};
-
-// determines if entity is on the spatial map
-Game_Map.prototype.isEntityInSpatialMap = function(entity) {
-  return this._spatialMap && this._spatialMap.entityHash[entity.id];
-};
-
-// get entities within a given bounding box in spatial map
-Game_Map.prototype.spatialMapEntitiesInBoundingBox = function(minX, maxX, minY, maxY) {
-  const entities = [];
-  this._spatialMap.qTree.entitiesInBoundingBox(entities, minX, maxX, minY, maxY);
-  return entities;
 };
