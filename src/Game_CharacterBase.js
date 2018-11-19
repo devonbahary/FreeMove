@@ -98,8 +98,8 @@ Game_CharacterBase.prototype.update = function() {
   _Game_CharacterBase_update.call(this);
   if (prevX !== this.x || prevY !== this.y) {
     this.updateSpatialMap(this);
-    this.updateAutoMove(this.x - prevX, this.y - prevY);
   }
+  this.updateAutoMove(this.x - prevX, this.y - prevY);
 };
 
 const _Game_CharacterBase_updateMove = Game_CharacterBase.prototype.updateMove;
@@ -109,21 +109,53 @@ Game_CharacterBase.prototype.updateMove = function() {
     const scalar = Math.abs(this._autoDx) + Math.abs(this._autoDy);
     const dx = Math.round4(distance * this._autoDx / scalar);
     const dy = Math.round4(distance * this._autoDy / scalar);
-    this._x += dx;
-    this._y += dy;
+
+    this._x += this.truncateDxByCollision(dx);
+    this._y += this.truncateDyByCollision(dy);
   }
   _Game_CharacterBase_updateMove.call(this);
 };
 
+Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
+  if (!dx) return dx;
+  const minX = dx > 0 ? this.x2 : this.x1 + dx; 
+  const maxX = dx > 0 ? this.x2 + dx : this.x1;
+  
+  const collisions = $gameMap.collisionsInBoundingBox(minX, maxX, this.y1, this.y2);
+  const nearestCollisionsX = collisions
+    .filter(obj => dx > 0 ? obj.x1 >= this.x2 : obj.x2 <= this.x1)
+    .filter(obj => !(obj.y2 < this.y1 || this.y2 < obj.y1))
+    .map(obj => dx > 0 ? obj.x1 : obj.x2)
+    .sort((a, b) => dx > 0 ? a - b : b - a);
+  if (!nearestCollisionsX.length) return dx;
+  return Math.round4(dx > 0 ? Math.min(dx, nearestCollisionsX[0] - this.x2 - 0.0001) : Math.max(dx, nearestCollisionsX[0] - this.x1));
+};
+
+Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
+  if (!dy) return dy;
+  const minY = dy > 0 ? this.y2 : this.y1 + dy;
+  const maxY = dy > 0 ? this.y2 + dy : this.y1;
+
+  const collisions = $gameMap.collisionsInBoundingBox(this.x1, this.x2, minY, maxY);
+  const nearestCollisionsY = collisions
+    .filter(obj => dy > 0 ? obj.y1 >= this.y2 : obj.y2 <= this.y1)
+    .filter(obj => !(obj.x2 < this.x1 || this.x2 < obj.x1))
+    .map(obj => dy > 0 ? obj.y1 : obj.y2)
+    .sort((a, b) => dy > 0 ? a - b : b - a);
+  if (!nearestCollisionsY.length) return dy;
+  return Math.round4(dy > 0 ? Math.min(dy, nearestCollisionsY[0] - this.y2 - 0.0001) : Math.max(dy, nearestCollisionsY[0] - this.y1));
+};
+
 Game_CharacterBase.prototype.updateAutoMove = function(dx, dy) {
-  if (this._autoDx) {
-    if (Math.sign(this._autoDx) !== Math.sign(this._autoDx - dx)) this._autoDx = 0;
-    else this._autoDx -= dx;
-  }
-  if (this._autoDy) {
-    if (Math.sign(this._autoDy) !== Math.sign(this._autoDy - dy)) this._autoDy = 0;
-    else this._autoDy -= dy;
-  }
+  this.resetAutoMovement();
+  // if (this._autoDx) {
+  //   if (Math.sign(this._autoDx) !== Math.sign(this._autoDx - dx)) this._autoDx = 0;
+  //   else this._autoDx -= dx;
+  // }
+  // if (this._autoDy) {
+  //   if (Math.sign(this._autoDy) !== Math.sign(this._autoDy - dy)) this._autoDy = 0;
+  //   else this._autoDy -= dy;
+  // }
 };
 
 Game_CharacterBase.prototype.moveFree = function(dir) {
