@@ -66,13 +66,13 @@
  * @parent  Characters
  * 
  * @param   hitbox color
- * @desc    Specify CSS hex color (e.g., "#ff4136") for hitboxes.
+ * @desc    Specify CSS hex color (e.g., "#ff4136") for tiles. Use 'random' to view individual tiles.
  * @type    text
  * @default blue
  * @parent  Characters
  * 
  * @param   character hitbox radius
- * @desc    default distance (in tiles) from center of characters used to calculate square hitbox
+ * @desc    Default distance (in tiles) from center of characters used to calculate square hitbox.
  * @type    number
  * @decimals 2
  * @default 0.5

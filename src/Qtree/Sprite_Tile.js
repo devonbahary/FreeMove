@@ -5,7 +5,7 @@
 
 const randomColor = require('randomcolor');
 
-Sprite_Tile.TILE_COLOR     = PluginManager.parameters('FreeMove')['tile color'] || '#ff4136';
+Sprite_Tile.TILE_COLOR         = PluginManager.parameters('FreeMove')['tile color'] || '#ff4136';
 
 function Sprite_Tile() {
   this.initialize.apply(this, arguments);
