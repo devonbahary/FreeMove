@@ -55,16 +55,7 @@
  * @default #ff4136
  * @parent  Tilemap
  * 
- * @param   tile border thickness
- * @desc    Thickness of a tile border that is impassable (shorter distances allow characters to move closer to edge).
- * @type    number
- * @decimals 2
- * @default 0.1
- * @max     0.5
- * @min     0.05
- * @parent  Tilemap
- * 
- * 
+ *
  * 
  * @param   Characters
  * 
