@@ -25,6 +25,17 @@ Game_Event.prototype.setupPageSettings = function() {
   this.setPageHitboxRadius();
 };
 
+// now takes single character argument
+Game_Event.prototype.checkEventTriggerTouch = function(character) {
+  if (!$gameMap.isEventRunning()) {
+      if (this._trigger === 2 && character === $gamePlayer) {
+          if (!this.isJumping() && this.isNormalPriority()) {
+              this.start();
+          }
+      }
+  }
+};
+
 Game_Event.prototype.setPageHitboxRadius = function() {
   const regex = /<hitbox:\s*(\d{1,2}(\.\d{1,2})?)>/i;
   const hitboxComment = this.page().list.find(eventCommand => this.isCommentCode(eventCommand.code) && eventCommand.parameters[0].match(regex));
@@ -38,4 +49,8 @@ Game_Event.prototype.setPageHitboxRadius = function() {
   if (this.event().meta.hitbox && Number(this.event().meta.hitbox) > 0) {
     this._hitboxRadius = Number(this.event().meta.hitbox);
   }
+};
+
+Game_Event.prototype.isEvent = function() {
+  return true;
 };

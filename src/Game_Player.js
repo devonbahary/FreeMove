@@ -14,3 +14,14 @@ Game_Player.prototype.getInputDirection = function() {
 Game_Player.prototype.executeMove = function(direction) {
   this.moveFree(direction);
 };
+
+// now takes single character argument
+Game_Player.prototype.checkEventTriggerTouch = function(character) {
+  if (!$gameMap.isEventRunning()) {
+      if (character.isEvent() && character.isTriggerIn([1, 2])) {
+          if (!this.isJumping() && character.isNormalPriority()) {
+              character.start();
+          }
+      }
+  }
+};

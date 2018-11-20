@@ -168,6 +168,11 @@ Game_CharacterBase.prototype.progressAutoMove = function(dx, dy) {
   }
 };
 
+// now takes single character argument
+Game_CharacterBase.prototype.checkEventTriggerTouch = function(character) {
+  return false;
+};
+
 Game_CharacterBase.prototype.moveFree = function(dir) {
   const distance = this.isDiagonal(dir) ? this.distancePerFrameDiagonal() : this.distancePerFrame();
   const dx = this.isLeft(dir) ? -distance : this.isRight(dir) ? distance : 0;
@@ -186,6 +191,10 @@ Game_CharacterBase.prototype.moveStraight = function(dir) {
   const dx = this.isLeft(dir) ? -1 : this.isRight(dir) ? 1 : 0;
   const dy = this.isUp(dir) ? -1 : this.isDown(dir) ? 1 : 0;
   this.autoMove(dx, dy);
+};
+
+Game_CharacterBase.prototype.isEvent = function() {
+  return false;
 };
 
 // get hitbox dimensions
