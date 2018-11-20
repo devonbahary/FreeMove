@@ -105,15 +105,22 @@ Game_CharacterBase.prototype.update = function() {
 const _Game_CharacterBase_updateMove = Game_CharacterBase.prototype.updateMove;
 Game_CharacterBase.prototype.updateMove = function() {
   if (this._autoDx || this._autoDy) {
-    const distance = this.distancePerFrame();
-    const scalar = Math.abs(this._autoDx) + Math.abs(this._autoDy);
-    const dx = Math.round4(distance * this._autoDx / scalar);
-    const dy = Math.round4(distance * this._autoDy / scalar);
-
-    this._x += this.truncateDxByCollision(dx);
-    this._y += this.truncateDyByCollision(dy);
+    this._x += this.truncateDxByCollision(this.dxThisFrame());
+    this._y += this.truncateDyByCollision(this.dyThisFrame());
   }
   _Game_CharacterBase_updateMove.call(this);
+};
+
+Game_CharacterBase.prototype.dxThisFrame = function() {
+  const distance = this.distancePerFrame();
+  const scalar = Math.abs(this._autoDx) + Math.abs(this._autoDy);
+  return Math.round4(distance * this._autoDx / scalar);
+};
+
+Game_CharacterBase.prototype.dyThisFrame = function() {
+  const distance = this.distancePerFrame();
+  const scalar = Math.abs(this._autoDx) + Math.abs(this._autoDy);
+  return Math.round4(distance * this._autoDy / scalar);
 };
 
 Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
@@ -147,15 +154,18 @@ Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
 };
 
 Game_CharacterBase.prototype.updateAutoMove = function(dx, dy) {
-  this.resetAutoMovement();
-  // if (this._autoDx) {
-  //   if (Math.sign(this._autoDx) !== Math.sign(this._autoDx - dx)) this._autoDx = 0;
-  //   else this._autoDx -= dx;
-  // }
-  // if (this._autoDy) {
-  //   if (Math.sign(this._autoDy) !== Math.sign(this._autoDy - dy)) this._autoDy = 0;
-  //   else this._autoDy -= dy;
-  // }
+  this.progressAutoMove(this.dxThisFrame(), this.dyThisFrame());
+};
+
+Game_CharacterBase.prototype.progressAutoMove = function(dx, dy) {
+  if (this._autoDx) {
+    if (Math.sign(this._autoDx) !== Math.sign(this._autoDx - dx)) this._autoDx = 0;
+    else this._autoDx -= dx;
+  }
+  if (this._autoDy) {
+    if (Math.sign(this._autoDy) !== Math.sign(this._autoDy - dy)) this._autoDy = 0;
+    else this._autoDy -= dy;
+  }
 };
 
 Game_CharacterBase.prototype.moveFree = function(dir) {

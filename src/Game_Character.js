@@ -3,6 +3,13 @@
 //
 // The superclass of Game_Player, Game_Follower, GameVehicle, and Game_Event.
 
+Game_Character.prototype.updateAutoMove = function(dx, dy) {
+  if (this._moveRoute && !this._moveRoute.skippable) {
+    this.progressAutoMove(dx, dy);
+  } else {
+    Game_CharacterBase.prototype.updateAutoMove.call(this, dx, dy);
+  }
+};
 
 Game_Character.prototype.dxFrom = function(char) {
   const cof = Math.sign(char.x - this.x);
