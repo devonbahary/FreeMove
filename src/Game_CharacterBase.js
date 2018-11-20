@@ -128,14 +128,35 @@ Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
   const minX = dx > 0 ? this.x2 : this.x1 + dx; 
   const maxX = dx > 0 ? this.x2 + dx : this.x1;
   
+  // get collision objects
   const collisions = $gameMap.collisionsInBoundingBox(minX, maxX, this.y1, this.y2);
-  const nearestCollisionsX = collisions
-    .filter(obj => dx > 0 ? obj.x1 >= this.x2 : obj.x2 <= this.x1)
-    .filter(obj => !(obj.y2 < this.y1 || this.y2 < obj.y1))
-    .map(obj => dx > 0 ? obj.x1 : obj.x2)
-    .sort((a, b) => dx > 0 ? a - b : b - a);
-  if (!nearestCollisionsX.length) return dx;
-  return Math.round4(dx > 0 ? Math.min(dx, nearestCollisionsX[0] - this.x2 - 0.0001) : Math.max(dx, nearestCollisionsX[0] - this.x1));
+  const nearestCollisions = collisions
+    .filter(obj => {
+      // check if through
+      if (obj.canCollide && !obj.canCollide()) return false;
+      // check if not y-aligned
+      if (obj.y2 < this.y1 || this.y2 < obj.y1) return false;
+      // check if in path
+      if (dx > 0 ? obj.x1 >= this.x2 : obj.x2 <= this.x1) return true;
+      return false;
+    })
+    .sort((a, b) => dx > 0 ? a.x1 - b.x1 : b.x2 - a.x2);
+  if (!nearestCollisions.length) return dx;
+
+  // truncate + checkEventTriggerTouch
+  if (dx > 0) {
+    if (dx > nearestCollisions[0].x1 - this.x2 - 0.0001) {
+      if (nearestCollisions[0].isThrough) this.checkEventTriggerTouch(nearestCollisions[0]);
+      dx = nearestCollisions[0].x1 - this.x2 - 0.0001;
+    }
+  } else if (dx < 0 ) {
+    if (dx < nearestCollisions[0].x2 - this.x1) {
+      if (nearestCollisions[0].isThrough) this.checkEventTriggerTouch(nearestCollisions[0]);
+      dx = nearestCollisions[0].x2 - this.x1;
+    }
+  }
+  
+  return Math.round4(dx);
 };
 
 Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
@@ -143,14 +164,35 @@ Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
   const minY = dy > 0 ? this.y2 : this.y1 + dy;
   const maxY = dy > 0 ? this.y2 + dy : this.y1;
 
+  // get collision objects
   const collisions = $gameMap.collisionsInBoundingBox(this.x1, this.x2, minY, maxY);
-  const nearestCollisionsY = collisions
-    .filter(obj => dy > 0 ? obj.y1 >= this.y2 : obj.y2 <= this.y1)
-    .filter(obj => !(obj.x2 < this.x1 || this.x2 < obj.x1))
-    .map(obj => dy > 0 ? obj.y1 : obj.y2)
-    .sort((a, b) => dy > 0 ? a - b : b - a);
-  if (!nearestCollisionsY.length) return dy;
-  return Math.round4(dy > 0 ? Math.min(dy, nearestCollisionsY[0] - this.y2 - 0.0001) : Math.max(dy, nearestCollisionsY[0] - this.y1));
+  const nearestCollisions = collisions
+    .filter(obj => {
+      // check if through
+      if (obj.canCollide && !obj.canCollide()) return false;
+      // check if not x-aligned
+      if (obj.x2 < this.x1 || this.x2 < obj.x1) return false;
+      // check if in path
+      if (dy > 0 ? obj.y1 >= this.y2 : obj.y2 <= this.y1) return true;
+      return false;
+    })
+    .sort((a, b) => dy > 0 ? a.y1 - b.y1 : b.y2 - a.y2);
+  if (!nearestCollisions.length) return dy;
+
+  // truncate + checkEventTriggerTouch
+  if (dy > 0) {
+    if (dy > nearestCollisions[0].y1 - this.y2 - 0.0001) {
+      if (nearestCollisions[0].isThrough) this.checkEventTriggerTouch(nearestCollisions[0]);
+      dy = nearestCollisions[0].y1 - this.y2 - 0.0001;
+    }
+  } else if (dy < 0 ) {
+    if (dy < nearestCollisions[0].y2 - this.y1) {
+      if (nearestCollisions[0].isThrough) this.checkEventTriggerTouch(nearestCollisions[0]);
+      dy = nearestCollisions[0].y2 - this.y1;
+    }
+  }
+
+  return Math.round4(dy);
 };
 
 Game_CharacterBase.prototype.updateAutoMove = function(dx, dy) {
@@ -191,6 +233,10 @@ Game_CharacterBase.prototype.moveStraight = function(dir) {
   const dx = this.isLeft(dir) ? -1 : this.isRight(dir) ? 1 : 0;
   const dy = this.isUp(dir) ? -1 : this.isDown(dir) ? 1 : 0;
   this.autoMove(dx, dy);
+};
+
+Game_CharacterBase.prototype.canCollide = function() {
+  return !this.isThrough() && this.isNormalPriority();
 };
 
 Game_CharacterBase.prototype.isEvent = function() {
