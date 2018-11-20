@@ -77,7 +77,7 @@ Fully impassable tiles exist as 1x1 (48px-by-48px) collision objects on the tile
 
 Options for viewing and customizing the tilemap can be found under the heading of the same name in the **Plugin Parameters**.
 
-![collision objects on the map](assets/tilemap.png)
+![collision objects on the map](/assets/tilemap.png)
 
 ### Characters 
 **FreeMove** makes use of a [Quadtree](https://en.wikipedia.org/wiki/Quadtree) to place characters onto a spatial map. The QTree is dynamic to the position of the characters within it and offers heuristics when determining collisions.
@@ -88,14 +88,14 @@ In a movement system that update every frame, it is inefficient for **all** movi
 
 Options for viewing and customizing the **QTree** can be found under the heading of the same name in the **Plugin Parameters**.
 
-![QTree in action](assets/QTree.gif)
+![QTree in action](/assets/QTree.gif)
 
 ### Events
 Enter the meta tag `<hitbox: x.x>` in an Event's **Note** to specify a particular `hitboxRadius` for the Event. 
 
 Enter the same tag in a page's Event Command **Comment** to specify a particular `hitboxRadius` for the Event on a page-level. This will override the **Note** meta tag.
 
-![Variable hitbox sizes](assets/hitbox.png)
+![Variable hitbox sizes](/assets/hitbox.png)
 
 ---
 
