@@ -6,6 +6,8 @@
 https://en.wikipedia.org/wiki/Quadtree  
 https://www.geeksforgeeks.org/quad-tree/amp/
 
+![QTree in action](../../assets/QTree.gif)
+
 ## Why QTree
 Unlike reality, objects in a game have no concept of proximity or relationship to other objects in game "space".
 
@@ -16,6 +18,8 @@ This works well enough with small numbers of objects, but becomes **computationa
 The **QTree is an implementation to give objects relationship to one another according to their proximity**, offering a heuristic for object collision.
 
 We will call these game objects **entities**.
+
+---
 
 ## API
 Init QTree:
@@ -32,6 +36,8 @@ Remove entity from spatial map:
 
 Call at end of each frame to collapse unnecessary Leaves (QTree maintenance):
 `qTree.update();`
+
+---
 
 ## How It Works
 

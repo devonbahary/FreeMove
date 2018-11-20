@@ -1,19 +1,20 @@
 # FreeMove
 
 ### To-do
- - tiles into QTree
- - collision: characters 
- - collision: tiles
  - new movement with autoMove (`moveStraight()`)
  - change how autoMove is subtracted
 
 ---
+## Plugin Parameters
+
+--- 
 
 ## Objective
 **RPG Maker MV** comes with a movement and collision system that fits well for its base use case: *non-continuous movement* on a grid with discrete jumps from one tile to another and smooth sprite movement across those tiles to facilitate that jump visually.
 
 **FreeMove** attempts to offer a solution for games that require more responsive controls and desire game objects to move on a spectrum about the game map.
 
+---
 
 ## Features
 
@@ -71,26 +72,30 @@ With `autoMove(...)`, we gain brevity and specificity: `autoMove(8, 0)`.
 
 ## Collision Properties
 
-![collision objects on the map](./assets/tilemap.png)
-
 ### Tilemap
 Fully impassable tiles exist as 1x1 (48px-by-48px) collision objects on the tilemap. One-directional impassability is represented by a 0.1-thick (~5px) border within that tile.
 
-### Characters 
-Characters can have variable hitbox dimensions, specified by the `hitboxRadius` which is used to calculate their square hitbox dimensions. 
+Options for viewing and customizing the tilemap can be found under the heading of the same name in the **Plugin Parameters**.
 
+![collision objects on the map](./assets/tilemap.png)
+
+### Characters 
+**FreeMove** makes use of a [Quadtree](https://en.wikipedia.org/wiki/Quadtree) to place characters onto a spatial map. The QTree is dynamic to the position of the characters within it and offers heuristics when determining collisions.
+
+Below we see how a given quadrant *partitions* as a threshold (in this case, 2 characters) is surpassed. Often, we're only interested in a moving entity's nearest neighbors when determining collision. Alternatively, the standard collision algorithm checks *all characters* on the map for collision. 
+
+In a movement system that update every frame, it is inefficient for **all** moving characters to check **all** characters on the map every frame.
+
+Options for viewing and customizing the **QTree** can be found under the heading of the same name in the **Plugin Parameters**.
+
+![QTree in action](./assets/QTree.gif)
 
 ### Events
 Enter the meta tag `<hitbox: x.x>` in an Event's **Note** to specify a particular `hitboxRadius` for the Event. 
 
 Enter the same tag in a page's Event Command **Comment** to specify a particular `hitboxRadius` for the Event on a page-level. This will override the **Note** meta tag.
 
-### Plugin Parameters
- - `display collision tiles` | Turn ON to display collision tiles (testing purposes).
-- `tile color` | Specify CSS hex color (e.g., "#ff4136") for tiles. Use 'random' to view individual tiles.
-- `display hitboxes` | Turn ON to display hitboxes (testing purposes).
-- `hitbox color` | Specify CSS hex color (e.g., "#ff4136") for hitboxes.
-- `character hitbox radius` | Default distance (in tiles) from center of characters used to calculate square hitbox.
+![Variable hitbox sizes](./assets/hitbox.png)
 
 ---
 
