@@ -182,6 +182,12 @@ Game_CharacterBase.prototype.autoMove = function(dx, dy) {
   this._autoDy = dy;
 };
 
+Game_CharacterBase.prototype.moveStraight = function(dir) {
+  const dx = this.isLeft(dir) ? -1 : this.isRight(dir) ? 1 : 0;
+  const dy = this.isUp(dir) ? -1 : this.isDown(dir) ? 1 : 0;
+  this.autoMove(dx, dy);
+};
+
 // get hitbox dimensions
 Game_CharacterBase.prototype.hitbox = function() {
   return {
