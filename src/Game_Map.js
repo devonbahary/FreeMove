@@ -6,7 +6,7 @@
 
 const QTree = require('./Qtree');
 
-Game_Map.TILE_BORDER_THICKNESS = 0.05;
+Game_Map.TILE_BORDER_THICKNESS = 0.0001;
 
 
 // create new spatial map for each new map
@@ -175,15 +175,16 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
         .filter(dir => !tileProperties[dir])
         .forEach(dir => {
           const thickness = Game_Map.TILE_BORDER_THICKNESS;
+          const tileBorder = { isTileBorder: true };
           switch(Number(dir)) {
             case 2:
-              return collisionObjects.push({ x1: x, x2: x + 1, y1: y + 1 - thickness, y2: y + 1});
+              return collisionObjects.push({ ...tileBorder, x1: x, x2: x + 1, y1: y + 1 - thickness, y2: y + 1});
             case 4:
-              return collisionObjects.push({ x1: x, x2: x + thickness, y1: y, y2: y + 1 });
+              return collisionObjects.push({ ...tileBorder, x1: x, x2: x + thickness, y1: y, y2: y + 1 });
             case 6:
-              return collisionObjects.push({ x1: x + 1 - thickness, x2: x + 1, y1: y, y2: y + 1 });
+              return collisionObjects.push({ ...tileBorder, x1: x + 1 - thickness, x2: x + 1, y1: y, y2: y + 1 });
             case 8:
-              return collisionObjects.push({ x1: x, x2: x + 1, y1: y, y2: y + thickness});
+              return collisionObjects.push({ ...tileBorder, x1: x, x2: x + 1, y1: y, y2: y + thickness});
           }
         });
     }
@@ -205,9 +206,21 @@ Game_Map.prototype.getTilemapCollisionGrid = function(tilemapCollisionObjects) {
 };
 
 Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y) {
-  if (!$gameMap.isValid(x)) x = Math.max(0, Math.min(x, $gameMap.width() - 1));
-  if (!$gameMap.isValid(y)) y = Math.max(0, Math.min(y, $gameMap.height() - 1));
-  return this._tilemapCollisionGrid[y][x];
+  if (!$gameMap.isValid(x, y)) {
+    x = Math.max(0, Math.min(x, $gameMap.width() - 1));
+    y = Math.max(0, Math.min(y, $gameMap.height() - 1));
+  }
+  const thickness = Game_Map.TILE_BORDER_THICKNESS;
+  return this._tilemapCollisionGrid[y][x].map(obj => {
+    if (!obj.isTileBorder) return obj;
+    if (obj.x2 - obj.x1 < 1) {
+      if (Number.isInteger(obj.x1)) return { x1: obj.x1 - thickness, x2: Math.round(obj.x2), y1: obj.y1, y2: obj.y2 };
+      if (Number.isInteger(obj.x2)) return { x1: Math.round(obj.x1), x2: obj.x2 + thickness, y1: obj.y1, y2: obj.y2 };
+    } else if (obj.y2 - obj.y1 < 1) {
+      if (Number.isInteger(obj.y1)) return { x1: obj.x1, x2: obj.x2, y1: obj.y1 - thickness, y2: Math.round(obj.y2) };
+      if (Number.isInteger(obj.y2)) return { x1: obj.x1, x2: obj.x2, y1: Math.round(obj.y2), y2: obj.y2 + thickness };
+    }
+  });
 };
 
 Game_Map.prototype.tilemapCollisionObjectsInBoundingBox = function(minX, maxX, minY, maxY) {
