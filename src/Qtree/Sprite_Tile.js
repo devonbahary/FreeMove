@@ -50,13 +50,11 @@ Sprite_Tile.prototype.scrolledY = function() {
 };
 
 Sprite_Tile.prototype.screenX = function() {
-  var tw = $gameMap.tileWidth();
-  return Math.round(this.scrolledX() * tw);
+  return Math.round(this.scrolledX() * $gameMap.tileWidth());
 };
 
 Sprite_Tile.prototype.screenY = function() {
-  var th = $gameMap.tileHeight();
-  return Math.round(this.scrolledY() * th);
+  return Math.round(this.scrolledY() * $gameMap.tileHeight());
 };
 
 module.exports = Sprite_Tile;
