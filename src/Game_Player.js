@@ -5,6 +5,11 @@
 // determinants and map scrolling functions.
 
 
+Game_Player.prototype.progressAutoMove = function(dx, dy) {
+  if (dx || dy) $gameParty.increaseSteps(Math.abs(dx) + Math.abs(dy));
+  Game_Character.prototype.progressAutoMove.call(this, dx, dy);
+};
+
 // overwritten
 Game_Player.prototype.getInputDirection = function() {
   return Input.dir8;
