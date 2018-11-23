@@ -7,6 +7,8 @@
 Game_Event.EVENT_COMMAND_COMMENT       = 108;
 
 Game_Event.prototype.isCommentCode = code => code === Game_Event.EVENT_COMMAND_COMMENT;
+Game_Event.prototype.isMoveTypeRandom = function() { return this._moveType === 1; };
+Game_Event.prototype.isMoveTypeApproach = function() { return this._moveType === 2; };
 
 
 // remove event from spatial map when cleared
@@ -50,6 +52,11 @@ Game_Event.prototype.setPageHitboxRadius = function() {
   if (this.event().meta.hitbox && Number(this.event().meta.hitbox) > 0) {
     this._hitboxRadius = Number(this.event().meta.hitbox);
   }
+};
+
+// smart random collision
+Game_Event.prototype.onCollision = function() {
+  if (this.isMoveTypeRandom() || this.isMoveTypeApproach()) this.resetAutoMovement();
 };
 
 Game_Event.prototype.isEvent = function() {

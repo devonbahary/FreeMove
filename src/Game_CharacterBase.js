@@ -169,6 +169,7 @@ Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
     }
   }
   
+  this.onCollision();
   return { dx, collision };
 };
 
@@ -205,6 +206,7 @@ Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
     }
   }
 
+  this.onCollision();
   return { dy, collision };
 };
 
@@ -256,6 +258,11 @@ Game_CharacterBase.prototype.canCollide = function() {
 
 Game_CharacterBase.prototype.isEvent = function() {
   return false;
+};
+
+
+Game_CharacterBase.prototype.onCollision = function() {
+  return;
 };
 
 // get hitbox dimensions
