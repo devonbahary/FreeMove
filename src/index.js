@@ -82,7 +82,8 @@
  * 
 */
 
-Math.round4 = number => Math.sign(number) * Math.floor(Math.abs(number) * 10000) / 10000;
+Math.floor4 = number => Math.sign(number) * Math.floor(Math.abs(number) * 10000) / 10000;
+Math.round4 = number => Math.round(Math.abs(number) * 10000) / 10000;
 
 require('./Game_Map');
 require('./Game_CharacterBase');
