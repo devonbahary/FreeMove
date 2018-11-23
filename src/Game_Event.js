@@ -30,6 +30,7 @@ Game_Event.prototype.checkEventTriggerTouch = function(character) {
   if (!$gameMap.isEventRunning()) {
       if (this._trigger === 2 && character === $gamePlayer) {
           if (!this.isJumping() && this.isNormalPriority()) {
+              this.resetAutoMovement();
               this.start();
           }
       }
