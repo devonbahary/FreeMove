@@ -268,10 +268,10 @@ Game_CharacterBase.prototype.onCollision = function() {
 // get hitbox dimensions
 Game_CharacterBase.prototype.hitbox = function() {
   return {
-    x1: this.x + 0.5 - this.hitboxRadius(),
-    x2: this.x + 0.5 + this.hitboxRadius(),
-    y1: this.y + 1 - this.hitboxRadius() * 2,
-    y2: this.y + 1,
+    x1: Math.round4(this.x + 0.5 - this.hitboxRadius()),
+    x2: Math.round4(this.x + 0.5 + this.hitboxRadius()),
+    y1: Math.round4(this.y + 1 - this.hitboxRadius() * 2),
+    y2: Math.round4(this.y + 1)
   };
 };
 
