@@ -22,8 +22,8 @@ Sprite_Tile.prototype.initialize = function(collisionTile) {
 
 Sprite_Tile.prototype.setTile = function(tile) {
   this._tile = tile;
-  this.width = $gameMap.tileWidth() * (tile.x2 - tile.x1);
-  this.height = $gameMap.tileHeight() * (tile.y2 - tile.y1);
+  this.width = Math.max(1, $gameMap.tileWidth() * (tile.x2 - tile.x1));
+  this.height = Math.max(1, $gameMap.tileHeight() * (tile.y2 - tile.y1));
   this.bitmap = new Bitmap(this.width, this.height);
   this.bitmap.paintOpacity = 125;
   if (Sprite_Tile.TILE_COLOR === 'random') this.bitmap.fillAll(randomColor());
