@@ -104,95 +104,108 @@ Game_CharacterBase.prototype.update = function() {
 
 const _Game_CharacterBase_updateMove = Game_CharacterBase.prototype.updateMove;
 Game_CharacterBase.prototype.updateMove = function() {
-  if (this._autoDx || this._autoDy) {
-    this._x += this.truncateDxByCollision(this.dxThisFrame());
-    this._y += this.truncateDyByCollision(this.dyThisFrame());
-  }
+  this.applyAutoMove();
   _Game_CharacterBase_updateMove.call(this);
+};
+
+Game_CharacterBase.prototype.applyAutoMove = function() {
+  if (!this._autoDx && !this._autoDy) return;
+
+  const wasEventRunning = $gameMap.isEventRunning();
+  let dx, dy, collision;
+  ({ dx, collision } = this.truncateDxByCollision(this.dxThisFrame()));
+  this._x = Math.round4(this.x + dx);
+  if (collision) {
+    this.checkEventTriggerTouch(collision);
+    if (!wasEventRunning && $gameMap.isEventRunning()) return;
+  }
+  ({ dy, collision } = this.truncateDyByCollision(this.dyThisFrame()));
+  this._y = Math.round4(this.y + dy);
+  if (collision) this.checkEventTriggerTouch(collision);
 };
 
 Game_CharacterBase.prototype.dxThisFrame = function() {
   const distance = this.distancePerFrame();
   const scalar = Math.abs(this._autoDx) + Math.abs(this._autoDy);
-  return Math.round4(distance * this._autoDx / scalar);
+  return scalar ? distance * this._autoDx / scalar : 0;
 };
 
 Game_CharacterBase.prototype.dyThisFrame = function() {
   const distance = this.distancePerFrame();
   const scalar = Math.abs(this._autoDx) + Math.abs(this._autoDy);
-  return Math.round4(distance * this._autoDy / scalar);
+  return scalar ? distance * this._autoDy / scalar : 0;
 };
 
 Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
-  if (!dx) return dx;
+  if (!dx) return { dx };
   const minX = dx > 0 ? this.x2 : this.x1 + dx; 
   const maxX = dx > 0 ? this.x2 + dx : this.x1;
   
   // get collision objects
-  const collisions = $gameMap.collisionsInBoundingBox(minX, maxX, this.y1, this.y2);
-  const nearestCollisions = collisions
+  const nearestCollisions = $gameMap.collisionsInBoundingBox(minX, maxX, this.y1, this.y2)
     .filter(obj => {
       // check if through
       if (obj.canCollide && !obj.canCollide()) return false;
       // check if not y-aligned
-      if (obj.y2 < this.y1 || this.y2 < obj.y1) return false;
+      if (obj.y2 <= this.y1 || this.y2 <= obj.y1) return false;
       // check if in path
       if (dx > 0 ? obj.x1 >= this.x2 : obj.x2 <= this.x1) return true;
       return false;
     })
     .sort((a, b) => dx > 0 ? a.x1 - b.x1 : b.x2 - a.x2);
-  if (!nearestCollisions.length) return dx;
+  if (!nearestCollisions.length) return { dx };
 
-  // truncate + checkEventTriggerTouch
+  // truncate + send collision object
+  let collision;
   if (dx > 0) {
-    if (dx > nearestCollisions[0].x1 - this.x2 - 0.0001) {
-      if (nearestCollisions[0].isThrough) this.checkEventTriggerTouch(nearestCollisions[0]);
-      dx = nearestCollisions[0].x1 - this.x2 - 0.0001;
+    if (dx > nearestCollisions[0].x1 - this.x2) {
+      if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
+      dx = nearestCollisions[0].x1 - this.x2;
     }
   } else if (dx < 0 ) {
     if (dx < nearestCollisions[0].x2 - this.x1) {
-      if (nearestCollisions[0].isThrough) this.checkEventTriggerTouch(nearestCollisions[0]);
+      if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
       dx = nearestCollisions[0].x2 - this.x1;
     }
   }
   
-  return Math.round4(dx);
+  return { dx, collision };
 };
 
 Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
-  if (!dy) return dy;
+  if (!dy) return { dy };
   const minY = dy > 0 ? this.y2 : this.y1 + dy;
   const maxY = dy > 0 ? this.y2 + dy : this.y1;
 
   // get collision objects
-  const collisions = $gameMap.collisionsInBoundingBox(this.x1, this.x2, minY, maxY);
-  const nearestCollisions = collisions
+  const nearestCollisions = $gameMap.collisionsInBoundingBox(this.x1, this.x2, minY, maxY)
     .filter(obj => {
       // check if through
       if (obj.canCollide && !obj.canCollide()) return false;
       // check if not x-aligned
-      if (obj.x2 < this.x1 || this.x2 < obj.x1) return false;
+      if (obj.x2 <= this.x1 || this.x2 <= obj.x1) return false;
       // check if in path
       if (dy > 0 ? obj.y1 >= this.y2 : obj.y2 <= this.y1) return true;
       return false;
     })
     .sort((a, b) => dy > 0 ? a.y1 - b.y1 : b.y2 - a.y2);
-  if (!nearestCollisions.length) return dy;
+  if (!nearestCollisions.length) return { dy };
 
-  // truncate + checkEventTriggerTouch
+  // truncate + send collision object
+  let collision;
   if (dy > 0) {
-    if (dy > nearestCollisions[0].y1 - this.y2 - 0.0001) {
-      if (nearestCollisions[0].isThrough) this.checkEventTriggerTouch(nearestCollisions[0]);
-      dy = nearestCollisions[0].y1 - this.y2 - 0.0001;
+    if (dy > nearestCollisions[0].y1 - this.y2) {
+      if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
+      dy = nearestCollisions[0].y1 - this.y2;
     }
   } else if (dy < 0 ) {
     if (dy < nearestCollisions[0].y2 - this.y1) {
-      if (nearestCollisions[0].isThrough) this.checkEventTriggerTouch(nearestCollisions[0]);
+      if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
       dy = nearestCollisions[0].y2 - this.y1;
     }
   }
 
-  return Math.round4(dy);
+  return { dy, collision };
 };
 
 Game_CharacterBase.prototype.updateAutoMove = function(dx, dy) {
@@ -203,10 +216,12 @@ Game_CharacterBase.prototype.progressAutoMove = function(dx, dy) {
   if (this._autoDx) {
     if (Math.sign(this._autoDx) !== Math.sign(this._autoDx - dx)) this._autoDx = 0;
     else this._autoDx -= dx;
+    if (Math.floor4(this._autoDx) === 0) this._autoDx = 0;
   }
   if (this._autoDy) {
     if (Math.sign(this._autoDy) !== Math.sign(this._autoDy - dy)) this._autoDy = 0;
     else this._autoDy -= dy;
+    if (Math.floor4(this._autoDy) === 0) this._autoDy = 0;
   }
 };
 
