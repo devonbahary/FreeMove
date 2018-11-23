@@ -15,21 +15,20 @@ Spriteset_Map.DISPLAY_TILES = JSON.parse(PluginManager.parameters('FreeMove')['d
 const _Spriteset_Map_createLowerLayer = Spriteset_Map.prototype.createLowerLayer;
 Spriteset_Map.prototype.createLowerLayer = function() {
   _Spriteset_Map_createLowerLayer.call(this);
-  if (Spriteset_Map.DISPLAY_PARTITION_GRID) this.createQTree();
-  if (Spriteset_Map.DISPLAY_HITBOXES) this.createHitboxes();
-  if (Spriteset_Map.DISPLAY_TILES) this.createCollisionTiles();
+  this.createQTree();
+  this.createHitboxes();
+  this.createCollisionTiles();
 };
 
 // create first partition sprite
 Spriteset_Map.prototype.createQTree = function() {
+  if (!Spriteset_Map.DISPLAY_PARTITION_GRID) return;
   this.addChild(new Sprite_Partition($gameMap._spatialMap.qTree));
 };
 
 Spriteset_Map.prototype.createHitboxes = function() {
-  let entities = [
-    ...$gameMap.events(),
-    $gamePlayer
-  ];
+  if (!Spriteset_Map.DISPLAY_HITBOXES) return;
+  let entities = [ ...$gameMap.events(), $gamePlayer ];
   if ($gamePlayer.followers().isVisible()) entities = [ ...entities, ...$gamePlayer.followers()._data ];
 
   this._hitboxSprites = entities.map(character => new Sprite_Hitbox(character));
@@ -37,6 +36,7 @@ Spriteset_Map.prototype.createHitboxes = function() {
 };
 
 Spriteset_Map.prototype.createCollisionTiles = function() {
+  if (!Spriteset_Map.DISPLAY_TILES) return;
   $gameMap._tilemapCollisionObjects.forEach(collisionObject => {
     this.addChild(new Sprite_Tile(collisionObject));
   });
