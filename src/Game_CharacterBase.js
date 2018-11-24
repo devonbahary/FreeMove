@@ -9,18 +9,6 @@ const Util = require('./util');
 
 Game_CharacterBase.DEFAULT_HITBOX_RADIUS = Number(PluginManager.parameters('FreeMove')['character hitbox radius']) || 0.5;
 
-Game_CharacterBase.prototype.isDiagonal = dir => dir % 2 === 1;
-Game_CharacterBase.prototype.isLeft = dir => dir % 3 === 1;
-Game_CharacterBase.prototype.isRight = dir => dir % 3 === 0;
-Game_CharacterBase.prototype.isUp = dir => dir > 6;
-Game_CharacterBase.prototype.isDown = dir => dir < 4;
-Game_CharacterBase.prototype.dirFromDxDy = (dx, dy) => {
-  let dir = dx < 0 ? 4 : dx > 0 ? 6 : null;
-  if (dir) dir = dy > 0 ? dir - 3 : dy < 0 ? dir + 3 : dir;
-  else dir = dy > 0 ? 2 : dy < 0 ? 8 : null;
-  return dir;
-}
-
 
 Object.defineProperties(Game_CharacterBase.prototype, {
   id: { get: function() { return this._id          }, configurable: true },
@@ -141,8 +129,9 @@ Game_CharacterBase.prototype.dyThisFrame = function() {
 
 Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
   if (!dx) return { dx };
-  const minX = dx > 0 ? this.x2 : this.x1 + dx; 
+  const minX = (dx > 0 ? this.x2 : this.x1 + dx) - $gameMap.tileBorderThickness(); 
   const maxX = dx > 0 ? this.x2 + dx : this.x1;
+  const dir = Util.dirFromDxDy(dx, 0);
   
   // get collision objects
   const nearestCollisions = $gameMap.collisionsInBoundingBox(minX, maxX, this.y1, this.y2)
@@ -156,6 +145,7 @@ Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
       return false;
     })
     .sort((a, b) => dx > 0 ? a.x1 - b.x1 : b.x2 - a.x2);
+
   if (!nearestCollisions.length) return { dx };
 
   // truncate + send collision object
@@ -178,11 +168,12 @@ Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
 
 Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
   if (!dy) return { dy };
-  const minY = dy > 0 ? this.y2 : this.y1 + dy;
+  const minY = (dy > 0 ? this.y2 : this.y1 + dy) - $gameMap.tileBorderThickness();
   const maxY = dy > 0 ? this.y2 + dy : this.y1;
+  const dir = Util.dirFromDxDy(0, dy);
 
   // get collision objects
-  const nearestCollisions = $gameMap.collisionsInBoundingBox(this.x1, this.x2, minY, maxY)
+  const nearestCollisions = $gameMap.collisionsInBoundingBox(this.x1, this.x2, minY, maxY, dir)
     .filter(obj => {
       // check if through
       if (obj.canCollide && !obj.canCollide()) return false;

@@ -5,6 +5,7 @@
 // determination functions.
 
 const QTree = require('./Qtree');
+const Util = require('./util');
 
 Game_Map.TILE_BORDER_THICKNESS = 0.0001;
 
@@ -174,7 +175,7 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
       Object.keys(tileProperties)
         .filter(dir => !tileProperties[dir])
         .forEach(dir => {
-          const thickness = Game_Map.TILE_BORDER_THICKNESS;
+          const thickness = this.tileBorderThickness();
           const tileBorder = { isTileBorder: true };
           switch(Number(dir)) {
             case 2:
@@ -205,39 +206,43 @@ Game_Map.prototype.getTilemapCollisionGrid = function(tilemapCollisionObjects) {
   return tilemapCollisionGrid;
 };
 
-Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y) {
+Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y, dir = null) {
   if (!$gameMap.isValid(x, y)) {
     x = Math.max(0, Math.min(x, $gameMap.width() - 1));
     y = Math.max(0, Math.min(y, $gameMap.height() - 1));
   }
-  const thickness = Game_Map.TILE_BORDER_THICKNESS;
+  const thickness = this.tileBorderThickness();
   return this._tilemapCollisionGrid[y][x].map(obj => {
     if (!obj.isTileBorder) return obj;
     if (obj.x2 - obj.x1 < 1) {
-      if (Number.isInteger(obj.x1)) return { x1: obj.x1 - thickness, x2: Math.round(obj.x2), y1: obj.y1, y2: obj.y2 };
-      if (Number.isInteger(obj.x2)) return { x1: Math.round(obj.x1), x2: obj.x2 + thickness, y1: obj.y1, y2: obj.y2 };
+      if (Number.isInteger(obj.x1)) return !Util.isRight(dir) ? { x1: obj.x1 - thickness, x2: Math.round(obj.x2), y1: obj.y1, y2: obj.y2 } : obj;
+      if (Number.isInteger(obj.x2)) return !Util.isLeft(dir) ? { x1: Math.round(obj.x1), x2: obj.x2 + thickness, y1: obj.y1, y2: obj.y2 } : obj;
     } else if (obj.y2 - obj.y1 < 1) {
-      if (Number.isInteger(obj.y1)) return { x1: obj.x1, x2: obj.x2, y1: obj.y1 - thickness, y2: Math.round(obj.y2) };
-      if (Number.isInteger(obj.y2)) return { x1: obj.x1, x2: obj.x2, y1: Math.round(obj.y2), y2: obj.y2 + thickness };
+      if (Number.isInteger(obj.y1)) return !Util.isDown(dir) ? { x1: obj.x1, x2: obj.x2, y1: obj.y1 - thickness, y2: Math.round(obj.y2) } : obj;
+      if (Number.isInteger(obj.y2)) return !Util.isUp(dir) ? { x1: obj.x1, x2: obj.x2, y1: Math.round(obj.y2), y2: obj.y2 + thickness } : obj;
     }
   });
 };
 
-Game_Map.prototype.tilemapCollisionObjectsInBoundingBox = function(minX, maxX, minY, maxY) {
+Game_Map.prototype.tilemapCollisionObjectsInBoundingBox = function(minX, maxX, minY, maxY, dir = null) {
   let collisionObjects = [];
   for (let x = Math.floor(minX); x <= Math.floor(maxX); x++) {
     for (let y = Math.floor(minY); y <= Math.floor(maxY); y++) {
-      collisionObjects = [ ...collisionObjects, ...this.getTilemapCollisionObjectsAtPos(x, y) ]; 
+      collisionObjects = [ ...collisionObjects, ...this.getTilemapCollisionObjectsAtPos(x, y, dir) ]; 
     }
   }
   return collisionObjects;
 };
 
-Game_Map.prototype.collisionsInBoundingBox = function(minX, maxX, minY, maxY) {
+Game_Map.prototype.collisionsInBoundingBox = function(minX, maxX, minY, maxY, dir = null) {
   return [
     ...this.spatialMapEntitiesInBoundingBox(minX, maxX, minY, maxY),
-    ...this.tilemapCollisionObjectsInBoundingBox(minX, maxX, minY, maxY)
+    ...this.tilemapCollisionObjectsInBoundingBox(minX, maxX, minY, maxY, dir)
   ];
+};
+
+Game_Map.prototype.tileBorderThickness = function() {
+  return Game_Map.TILE_BORDER_THICKNESS;
 };
 
 // update spatial map 
