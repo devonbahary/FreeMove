@@ -230,6 +230,22 @@ Game_CharacterBase.prototype.progressAutoMove = function(dx, dy) {
   }
 };
 
+// reset _hitboxRadius to allow for reassignment
+const _Game_CharacterBase_setImage = Game_CharacterBase.prototype.setImage;
+Game_CharacterBase.prototype.setImage = function(characterName, characterIndex) {
+  this._hitboxRadius = null;
+  _Game_CharacterBase_setImage.call(this, characterName, characterIndex);
+  this._hitboxRadius = this.hitboxRadius();
+};
+
+// reset _hitboxRadius to allow for reassignment
+const _Game_CharacterBase_setTileImage = Game_CharacterBase.prototype.setTileImage;
+Game_CharacterBase.prototype.setTileImage = function(tileId) {
+  this._hitboxRadius = null;
+  _Game_CharacterBase_setTileImage.call(this, tileId);
+  this._hitboxRadius = this.hitboxRadius();
+};
+
 // now takes single character argument
 Game_CharacterBase.prototype.checkEventTriggerTouch = function(character) {
   return false;
@@ -263,7 +279,6 @@ Game_CharacterBase.prototype.isEvent = function() {
   return false;
 };
 
-
 Game_CharacterBase.prototype.onCollision = function() {
   return;
 };
@@ -280,6 +295,7 @@ Game_CharacterBase.prototype.hitbox = function() {
 
 // distance from center of characters used to calculate square hitbox
 Game_CharacterBase.prototype.hitboxRadius = function() {
+  if (this._hitboxRadius) return this._hitboxRadius;
   return this.isTile() || this.isObjectCharacter() ? 0.5 : this._hitboxRadius || Game_CharacterBase.DEFAULT_HITBOX_RADIUS;
 };
 
