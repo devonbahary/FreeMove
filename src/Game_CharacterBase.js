@@ -24,6 +24,8 @@ Game_CharacterBase.prototype.dirFromDxDy = (dx, dy) => {
 
 Object.defineProperties(Game_CharacterBase.prototype, {
   id: { get: function() { return this._id          }, configurable: true },
+  x:  { get: function() { return Math.round4(this._x); }, configurable: true },
+  y:  { get: function() { return Math.round4(this._y); }, configurable: true },
   x1: { get: function() { return this.hitbox().x1; }, configurable: true },
   x2: { get: function() { return this.hitbox().x2; }, configurable: true },
   y1: { get: function() { return this.hitbox().y1; }, configurable: true },
@@ -115,13 +117,13 @@ Game_CharacterBase.prototype.applyAutoMove = function() {
   const wasEventRunning = $gameMap.isEventRunning();
   let dx, dy, collision;
   ({ dx, collision } = this.truncateDxByCollision(this.dxThisFrame()));
-  this._x = Math.round4(this.x + dx);
+  this._x = this._x + dx;
   if (collision) {
     this.checkEventTriggerTouch(collision);
     if (!wasEventRunning && $gameMap.isEventRunning()) return;
   }
   ({ dy, collision } = this.truncateDyByCollision(this.dyThisFrame()));
-  this._y = Math.round4(this.y + dy);
+  this._y = this._y + dy;
   if (collision) this.checkEventTriggerTouch(collision);
 };
 
@@ -269,10 +271,10 @@ Game_CharacterBase.prototype.onCollision = function() {
 // get hitbox dimensions
 Game_CharacterBase.prototype.hitbox = function() {
   return {
-    x1: Math.round4(this.x + 0.5 - this.hitboxRadius()),
-    x2: Math.round4(this.x + 0.5 + this.hitboxRadius()),
-    y1: Math.round4(this.y + 1 - this.hitboxRadius() * 2),
-    y2: Math.round4(this.y + 1)
+    x1: Math.round4(this._x + 0.5 - this.hitboxRadius()),
+    x2: Math.round4(this._x + 0.5 + this.hitboxRadius()),
+    y1: Math.round4(this._y + 1 - this.hitboxRadius() * 2),
+    y2: Math.round4(this._y + 1)
   };
 };
 
