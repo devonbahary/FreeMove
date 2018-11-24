@@ -3,6 +3,9 @@
 //
 // The superclass of Game_Player, Game_Follower, GameVehicle, and Game_Event.
 
+const Util = require('./util');
+
+
 Game_Character.prototype.updateAutoMove = function(dx, dy) {
   if (this._moveRoute && !this._moveRoute.skippable) {
     this.progressAutoMove(dx, dy);
@@ -15,8 +18,8 @@ Game_Character.prototype.moveRandom = function() {
   let dir = 5;
   while (dir === 5) dir = Math.ceil(Math.random() * 9);
 
-  const dx = this.isLeft(dir) ? -1 : this.isRight(dir) ? 1 : 0;
-  const dy = this.isUp(dir) ? -1 : this.isDown(dir) ? 1 : 0;
+  const dx = Util.isLeft(dir) ? -1 : Util.isRight(dir) ? 1 : 0;
+  const dy = Util.isUp(dir) ? -1 : Util.isDown(dir) ? 1 : 0;
   this.autoMove(dx, dy);
 };
 
