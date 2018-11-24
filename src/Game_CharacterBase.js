@@ -150,16 +150,12 @@ Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
 
   // truncate + send collision object
   let collision;
-  if (dx > 0) {
-    if (dx > nearestCollisions[0].x1 - this.x2) {
-      if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
-      dx = nearestCollisions[0].x1 - this.x2;
-    }
-  } else if (dx < 0 ) {
-    if (dx < nearestCollisions[0].x2 - this.x1) {
-      if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
-      dx = nearestCollisions[0].x2 - this.x1;
-    }
+  if (dx > 0 && dx > nearestCollisions[0].x1 - this.x2) {
+    if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
+    dx = nearestCollisions[0].x1 - this.x2;
+  } else if (dx < 0 && dx < nearestCollisions[0].x2 - this.x1) {
+    if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
+    dx = nearestCollisions[0].x2 - this.x1;
   }
   
   this.onCollision();
@@ -188,16 +184,12 @@ Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
 
   // truncate + send collision object
   let collision;
-  if (dy > 0) {
-    if (dy > nearestCollisions[0].y1 - this.y2) {
-      if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
-      dy = nearestCollisions[0].y1 - this.y2;
-    }
-  } else if (dy < 0 ) {
-    if (dy < nearestCollisions[0].y2 - this.y1) {
-      if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
-      dy = nearestCollisions[0].y2 - this.y1;
-    }
+  if (dy > 0 && dy > nearestCollisions[0].y1 - this.y2) {
+    if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
+    dy = nearestCollisions[0].y1 - this.y2;
+  } else if (dy < 0 && dy < nearestCollisions[0].y2 - this.y1) {
+    if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
+    dy = nearestCollisions[0].y2 - this.y1;
   }
 
   this.onCollision();
