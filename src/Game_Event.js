@@ -11,6 +11,11 @@ Game_Event.prototype.isMoveTypeRandom = function() { return this._moveType === 1
 Game_Event.prototype.isMoveTypeApproach = function() { return this._moveType === 2; };
 
 
+// varies with Game_CharacterBase
+Game_Event.prototype.canCollideWithObject = function(object) {
+  return true;
+};
+
 // remove event from spatial map when cleared
 const _Game_Event_clearPageSettings = Game_Event.prototype.clearPageSettings;
 Game_Event.prototype.clearPageSettings = function() {

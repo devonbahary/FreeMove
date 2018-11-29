@@ -131,13 +131,13 @@ Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
   if (!dx) return { dx };
   const minX = (dx > 0 ? this.x2 : this.x1 + dx) - $gameMap.tileBorderThickness(); 
   const maxX = dx > 0 ? this.x2 + dx : this.x1;
-  const dir = Util.dirFromDxDy(dx, 0);
+  const dir = dirFromDxDy(dx, 0);
   
   // get collision objects
-  const nearestCollisions = $gameMap.collisionsInBoundingBox(minX, maxX, this.y1, this.y2)
+  const nearestCollisions = $gameMap.collisionsInBoundingBox(minX, maxX, this.y1, this.y2, dir)
     .filter(obj => {
       // check if through
-      if (obj.canCollide && !obj.canCollide()) return false;
+      if (!this.canCollideWith(obj)) return false;
       // check if not y-aligned
       if (obj.y2 <= this.y1 || this.y2 <= obj.y1) return false;
       // check if in path
@@ -166,13 +166,13 @@ Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
   if (!dy) return { dy };
   const minY = (dy > 0 ? this.y2 : this.y1 + dy) - $gameMap.tileBorderThickness();
   const maxY = dy > 0 ? this.y2 + dy : this.y1;
-  const dir = Util.dirFromDxDy(0, dy);
+  const dir = dirFromDxDy(0, dy);
 
   // get collision objects
   const nearestCollisions = $gameMap.collisionsInBoundingBox(this.x1, this.x2, minY, maxY, dir)
     .filter(obj => {
       // check if through
-      if (obj.canCollide && !obj.canCollide()) return false;
+      if (!this.canCollideWith(obj)) return false;
       // check if not x-aligned
       if (obj.x2 <= this.x1 || this.x2 <= obj.x1) return false;
       // check if in path
@@ -254,8 +254,16 @@ Game_CharacterBase.prototype.moveStraight = function(dir) {
   this.autoMove(dx, dy);
 };
 
-Game_CharacterBase.prototype.canCollide = function() {
-  return !this.isThrough() && this.isNormalPriority();
+// includes self-check
+Game_CharacterBase.prototype.canCollideWith = function(object) {
+  if (this.isThrough() || this.isDebugThrough()) return false;
+  if (object.isThrough && object.isThrough()) return false;
+  return this.canCollideWithObject(object);
+};
+
+// will vary with Game_Event
+Game_CharacterBase.prototype.canCollideWithObject = function(object) {
+  return !object.isNormalPriority || (object.isNormalPriority && object.isNormalPriority());
 };
 
 Game_CharacterBase.prototype.isEvent = function() {
@@ -263,7 +271,6 @@ Game_CharacterBase.prototype.isEvent = function() {
 };
 
 Game_CharacterBase.prototype.onCollision = function() {
-  return;
 };
 
 // get hitbox dimensions
