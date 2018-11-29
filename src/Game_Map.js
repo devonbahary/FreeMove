@@ -5,7 +5,7 @@
 // determination functions.
 
 const QTree = require('./Qtree');
-const Util = require('./util');
+const { isDown, isLeft, isRight, isUp } = require('./util');
 
 Game_Map.TILE_BORDER_THICKNESS = 0.0001;
 
@@ -215,11 +215,11 @@ Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y, dir = null) 
   return this._tilemapCollisionGrid[y][x].map(obj => {
     if (!obj.isTileBorder) return obj;
     if (obj.x2 - obj.x1 < 1) {
-      if (Number.isInteger(obj.x1)) return !Util.isRight(dir) ? { x1: obj.x1 - thickness, x2: Math.round(obj.x2), y1: obj.y1, y2: obj.y2 } : obj;
-      if (Number.isInteger(obj.x2)) return !Util.isLeft(dir) ? { x1: Math.round(obj.x1), x2: obj.x2 + thickness, y1: obj.y1, y2: obj.y2 } : obj;
+      if (Number.isInteger(obj.x1)) return !isRight(dir) ? { x1: obj.x1 - thickness, x2: Math.round(obj.x2), y1: obj.y1, y2: obj.y2 } : obj;
+      if (Number.isInteger(obj.x2)) return !isLeft(dir) ? { x1: Math.round(obj.x1), x2: obj.x2 + thickness, y1: obj.y1, y2: obj.y2 } : obj;
     } else if (obj.y2 - obj.y1 < 1) {
-      if (Number.isInteger(obj.y1)) return !Util.isDown(dir) ? { x1: obj.x1, x2: obj.x2, y1: obj.y1 - thickness, y2: Math.round(obj.y2) } : obj;
-      if (Number.isInteger(obj.y2)) return !Util.isUp(dir) ? { x1: obj.x1, x2: obj.x2, y1: Math.round(obj.y2), y2: obj.y2 + thickness } : obj;
+      if (Number.isInteger(obj.y1)) return !isDown(dir) ? { x1: obj.x1, x2: obj.x2, y1: obj.y1 - thickness, y2: Math.round(obj.y2) } : obj;
+      if (Number.isInteger(obj.y2)) return !isUp(dir) ? { x1: obj.x1, x2: obj.x2, y1: Math.round(obj.y2), y2: obj.y2 + thickness } : obj;
     }
   });
 };

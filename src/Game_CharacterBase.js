@@ -5,7 +5,7 @@
 // coordinates and images, shared by all characters.
 
 const uuid = require('uuid');
-const Util = require('./util');
+const { isDown, isLeft, isRight, isUp, isDiagonal, dirFromDxDy } = require('./util');
 
 Game_CharacterBase.DEFAULT_HITBOX_RADIUS = Number(PluginManager.parameters('FreeMove')['character hitbox radius']) || 0.5;
 
@@ -55,23 +55,23 @@ Game_CharacterBase.prototype.distancePerFrameDiagonal = function() {
 Game_CharacterBase.prototype.setDirection = function(dir) {
   if (this.isDirectionFixed() || !dir) return;
   if (this._lastDir !== dir) {
-    if (Util.isDiagonal(dir)) {
+    if (isDiagonal(dir)) {
       switch(this.direction()) {
         case 2: // down 
-          if (Util.isLeft(dir)) this._direction = 4;
-          else if (Util.isRight(dir)) this._direction = 6;
+          if (isLeft(dir)) this._direction = 4;
+          else if (isRight(dir)) this._direction = 6;
           break;
         case 4: // left
-          if (Util.isUp(dir)) this._direction = 8;
-          else if (Util.isDown(dir)) this._direction = 2;
+          if (isUp(dir)) this._direction = 8;
+          else if (isDown(dir)) this._direction = 2;
           break;
         case 6: // right
-          if (Util.isUp(dir)) this._direction = 8;
-          else if (Util.isDown(dir)) this._direction = 2;
+          if (isUp(dir)) this._direction = 8;
+          else if (isDown(dir)) this._direction = 2;
           break;
         case 8: // up
-          if (Util.isLeft(dir)) this._direction = 4;
-          else if (Util.isRight(dir)) this._direction = 6;
+          if (isLeft(dir)) this._direction = 4;
+          else if (isRight(dir)) this._direction = 6;
           break;
       }
     } else {
@@ -235,22 +235,22 @@ Game_CharacterBase.prototype.checkEventTriggerTouch = function(character) {
 };
 
 Game_CharacterBase.prototype.moveFree = function(dir) {
-  const distance = Util.isDiagonal(dir) ? this.distancePerFrameDiagonal() : this.distancePerFrame();
-  const dx = Util.isLeft(dir) ? -distance : Util.isRight(dir) ? distance : 0;
-  const dy = Util.isUp(dir) ? -distance : Util.isDown(dir) ? distance : 0;
+  const distance = isDiagonal(dir) ? this.distancePerFrameDiagonal() : this.distancePerFrame();
+  const dx = isLeft(dir) ? -distance : isRight(dir) ? distance : 0;
+  const dy = isUp(dir) ? -distance : isDown(dir) ? distance : 0;
   this.autoMove(dx, dy);
 };
 
 Game_CharacterBase.prototype.autoMove = function(dx, dy) {
   if (!dx && !dy) return;
-  this.setDirection(Util.dirFromDxDy(dx, dy));
+  this.setDirection(dirFromDxDy(dx, dy));
   this._autoDx = dx;
   this._autoDy = dy;
 };
 
 Game_CharacterBase.prototype.moveStraight = function(dir) {
-  const dx = Util.isLeft(dir) ? -1 : Util.isRight(dir) ? 1 : 0;
-  const dy = Util.isUp(dir) ? -1 : Util.isDown(dir) ? 1 : 0;
+  const dx = isLeft(dir) ? -1 : isRight(dir) ? 1 : 0;
+  const dy = isUp(dir) ? -1 : isDown(dir) ? 1 : 0;
   this.autoMove(dx, dy);
 };
 
