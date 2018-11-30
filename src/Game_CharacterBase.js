@@ -8,6 +8,7 @@ const uuid = require('uuid');
 const { isDown, isLeft, isRight, isUp, isDiagonal, dirFromDxDy } = require('./util');
 
 Game_CharacterBase.DEFAULT_HITBOX_RADIUS = Number(PluginManager.parameters('FreeMove')['character hitbox radius']) || 0.5;
+Game_CharacterBase.TRIGGER_HERE_OVERLAP_THRESHOLD = 0.75;
 
 
 Object.defineProperties(Game_CharacterBase.prototype, {
@@ -26,6 +27,7 @@ Object.defineProperties(Game_CharacterBase.prototype, {
   _autoDy         : movement determined in the y-axis
   _lastDir        : used to determine appropriate 4-dir in 8-dir movement
   _hitboxRadius   : used to calculate square hitbox dimensions
+  _triggerHereEvents : used to keep track of overlapped events that have already been triggered
 */
 const _Game_CharacterBase_initMembers = Game_CharacterBase.prototype.initMembers;
 Game_CharacterBase.prototype.initMembers = function() {
@@ -34,6 +36,7 @@ Game_CharacterBase.prototype.initMembers = function() {
   this.resetAutoMovement();
   this._lastDir = 2;
   this._hitboxRadius = this.hitboxRadius();
+  this._triggerHereEvents = [];
 };
 
 Game_CharacterBase.prototype.resetAutoMovement = function() {
@@ -102,17 +105,22 @@ Game_CharacterBase.prototype.updateMove = function() {
 Game_CharacterBase.prototype.applyAutoMove = function() {
   if (!this._autoDx && !this._autoDy) return;
 
+  let dx = this.dxThisFrame();
+  let dy = this.dyThisFrame();
+  const collisions = this.getCollisionsForMovement(dx, dy);
+
+  let collision;
   const wasEventRunning = $gameMap.isEventRunning();
-  let dx, dy, collision;
-  ({ dx, collision } = this.truncateDxByCollision(this.dxThisFrame()));
+  ({ dx, collision } = this.truncateDxByCollision(collisions, dx));
   this._x = this._x + dx;
   if (collision) {
     this.checkEventTriggerTouch(collision);
     if (!wasEventRunning && $gameMap.isEventRunning()) return;
   }
-  ({ dy, collision } = this.truncateDyByCollision(this.dyThisFrame()));
+  ({ dy, collision } = this.truncateDyByCollision(collisions, dy));
   this._y = this._y + dy;
   if (collision) this.checkEventTriggerTouch(collision);
+  this._triggerHereEvents = this._triggerHereEvents.filter(event => this.getOverlapRatioWith(event) > 0);
 };
 
 Game_CharacterBase.prototype.dxThisFrame = function() {
@@ -127,29 +135,32 @@ Game_CharacterBase.prototype.dyThisFrame = function() {
   return scalar ? distance * this._autoDy / scalar : 0;
 };
 
-Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
+Game_CharacterBase.prototype.getCollisionsForMovement = function(dx, dy) {
+  const dir = dirFromDxDy(dx, dy);
+  const minX = dx === 0 ? this.x1 : Math.min(this.x1, this.x1 + dx);
+  const maxX = dx === 0 ? this.x2 : Math.max(this.x2, this.x2 + dx);
+  const minY = dy === 0 ? this.y1 : Math.min(this.y1, this.y1 + dy);
+  const maxY = dy === 0 ? this.y2 : Math.max(this.y2, this.y2 + dy);
+  return $gameMap.collisionsInBoundingBox(minX, maxX, minY, maxY, dir);
+};
+
+Game_CharacterBase.prototype.truncateDxByCollision = function(collisions, dx) {
   if (!dx) return { dx };
-  const minX = (dx > 0 ? this.x2 : this.x1 + dx) - $gameMap.tileBorderThickness(); 
-  const maxX = dx > 0 ? this.x2 + dx : this.x1;
-  const dir = dirFromDxDy(dx, 0);
+
+  let collision = this.getCollisionHere(collisions);
   
-  // get collision objects
-  const nearestCollisions = $gameMap.collisionsInBoundingBox(minX, maxX, this.y1, this.y2, dir)
-    .filter(obj => {
-      // check if through
-      if (!this.canCollideWith(obj)) return false;
-      // check if not y-aligned
-      if (obj.y2 <= this.y1 || this.y2 <= obj.y1) return false;
-      // check if in path
-      if (dx > 0 ? obj.x1 >= this.x2 : obj.x2 <= this.x1) return true;
-      return false;
-    })
+  // get collidable in-path objects
+  const nearestCollisions = collisions
+    .filter(obj => (
+      this.canCollideWith(obj) && // through-, debug-, priority-check
+      !(obj.y2 <= this.y1 || this.y2 <= obj.y1) && // y-align check
+      (dx > 0 ? obj.x1 >= this.x2 : obj.x2 <= this.x1) // in-path check
+    ))
     .sort((a, b) => dx > 0 ? a.x1 - b.x1 : b.x2 - a.x2);
 
-  if (!nearestCollisions.length) return { dx };
+  if (!nearestCollisions.length) return { dx, collision };
 
-  // truncate + send collision object
-  let collision;
+  // truncate by collision
   if (dx > 0 && dx > nearestCollisions[0].x1 - this.x2) {
     if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
     dx = nearestCollisions[0].x1 - this.x2;
@@ -162,28 +173,23 @@ Game_CharacterBase.prototype.truncateDxByCollision = function(dx) {
   return { dx, collision };
 };
 
-Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
+Game_CharacterBase.prototype.truncateDyByCollision = function(collisions, dy) {
   if (!dy) return { dy };
-  const minY = (dy > 0 ? this.y2 : this.y1 + dy) - $gameMap.tileBorderThickness();
-  const maxY = dy > 0 ? this.y2 + dy : this.y1;
-  const dir = dirFromDxDy(0, dy);
 
-  // get collision objects
-  const nearestCollisions = $gameMap.collisionsInBoundingBox(this.x1, this.x2, minY, maxY, dir)
-    .filter(obj => {
-      // check if through
-      if (!this.canCollideWith(obj)) return false;
-      // check if not x-aligned
-      if (obj.x2 <= this.x1 || this.x2 <= obj.x1) return false;
-      // check if in path
-      if (dy > 0 ? obj.y1 >= this.y2 : obj.y2 <= this.y1) return true;
-      return false;
-    })
+  let collision = this.getCollisionHere(collisions);
+
+  // get collidable in-path objects
+  const nearestCollisions = collisions
+    .filter(obj => (
+      this.canCollideWith(obj) && // through-, debug-, priority-check
+      !(obj.x2 <= this.x1 || this.x2 <= obj.x1) && // x-align check
+      (dy > 0 ? obj.y1 >= this.y2 : obj.y2 <= this.y1) // in-path check
+    ))
     .sort((a, b) => dy > 0 ? a.y1 - b.y1 : b.y2 - a.y2);
-  if (!nearestCollisions.length) return { dy };
 
-  // truncate + send collision object
-  let collision;
+  if (!nearestCollisions.length) return { dy, collision };
+
+  // truncate by collision
   if (dy > 0 && dy > nearestCollisions[0].y1 - this.y2) {
     if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
     dy = nearestCollisions[0].y1 - this.y2;
@@ -194,6 +200,32 @@ Game_CharacterBase.prototype.truncateDyByCollision = function(dy) {
 
   this.onCollision();
   return { dy, collision };
+};
+
+Game_CharacterBase.prototype.getCollisionHere = function(collisions) {
+  let collision;
+  const overlappingEvents = collisions.filter(obj => !this._triggerHereEvents.includes(obj) && this.canTriggerObjHere(obj));
+  if (overlappingEvents.length) {
+    collision = overlappingEvents[0];
+    this._triggerHereEvents.push(collision);
+  }
+  return collision;
+};
+
+// includes self-check
+Game_CharacterBase.prototype.canCollideWith = function(obj) {
+  if (this.isThrough() || this.isDebugThrough()) return false;
+  if (obj.isThrough && obj.isThrough()) return false;
+  return this.canCollideWithObject(obj);
+};
+
+// will vary with Game_Event
+Game_CharacterBase.prototype.canCollideWithObject = function(obj) {
+  return !obj.isNormalPriority || (obj.isNormalPriority && obj.isNormalPriority());
+};
+
+Game_CharacterBase.prototype.canTriggerObjHere = function(obj) {
+  return obj !== this && obj.isEvent && obj.isEvent() && !obj.isNormalPriority() && this.getOverlapRatioWith(obj) > Game_CharacterBase.TRIGGER_HERE_OVERLAP_THRESHOLD;
 };
 
 Game_CharacterBase.prototype.updateAutoMove = function(dx, dy) {
@@ -254,23 +286,25 @@ Game_CharacterBase.prototype.moveStraight = function(dir) {
   this.autoMove(dx, dy);
 };
 
-// includes self-check
-Game_CharacterBase.prototype.canCollideWith = function(object) {
-  if (this.isThrough() || this.isDebugThrough()) return false;
-  if (object.isThrough && object.isThrough()) return false;
-  return this.canCollideWithObject(object);
-};
-
-// will vary with Game_Event
-Game_CharacterBase.prototype.canCollideWithObject = function(object) {
-  return !object.isNormalPriority || (object.isNormalPriority && object.isNormalPriority());
-};
-
 Game_CharacterBase.prototype.isEvent = function() {
   return false;
 };
 
 Game_CharacterBase.prototype.onCollision = function() {
+Game_CharacterBase.prototype.getOverlapRatioWith = function(obj) {
+  if (this.x1 > obj.x2 || obj.x1 > this.x2 || this.y1 > obj.y2 || obj.y1 > this.y2) return 0;
+  const overlapObj = {
+    x1: Math.max(this.x1, obj.x1),
+    x2: Math.min(this.x2, obj.x2),
+    y1: Math.max(this.y1, obj.y1),
+    y2: Math.min(this.y2, obj.y2),
+  };
+
+  const objAArea = (this.x2 - this.x1) * (this.y2 - this.y1);
+  const objBArea = (obj.x2 - obj.x1) * (obj.y2 - obj.y1);
+  const overlapObjArea = (overlapObj.x2 - overlapObj.x1) * (overlapObj.y2 - overlapObj.y1);
+
+  return overlapObjArea / Math.min(objAArea, objBArea);
 };
 
 // get hitbox dimensions
