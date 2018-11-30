@@ -60,7 +60,7 @@ Game_Event.prototype.setPageHitboxRadius = function() {
 };
 
 // smart random collision
-Game_Event.prototype.onCollision = function() {
+Game_Event.prototype.resetEventRandomAutonomousMovement = function() {
   if (this.isMoveTypeRandom() || this.isMoveTypeApproach()) this.resetAutoMovement();
 };
 

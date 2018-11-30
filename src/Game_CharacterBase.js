@@ -164,12 +164,13 @@ Game_CharacterBase.prototype.truncateDxByCollision = function(collisions, dx) {
   if (dx > 0 && dx > nearestCollisions[0].x1 - this.x2) {
     if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
     dx = nearestCollisions[0].x1 - this.x2;
+    this.resetEventRandomAutonomousMovement();
   } else if (dx < 0 && dx < nearestCollisions[0].x2 - this.x1) {
     if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
     dx = nearestCollisions[0].x2 - this.x1;
+    this.resetEventRandomAutonomousMovement();
   }
   
-  this.onCollision();
   return { dx, collision };
 };
 
@@ -193,12 +194,13 @@ Game_CharacterBase.prototype.truncateDyByCollision = function(collisions, dy) {
   if (dy > 0 && dy > nearestCollisions[0].y1 - this.y2) {
     if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
     dy = nearestCollisions[0].y1 - this.y2;
+    this.resetEventRandomAutonomousMovement();
   } else if (dy < 0 && dy < nearestCollisions[0].y2 - this.y1) {
     if (nearestCollisions[0].isThrough) collision = nearestCollisions[0];
     dy = nearestCollisions[0].y2 - this.y1;
+    this.resetEventRandomAutonomousMovement();
   }
 
-  this.onCollision();
   return { dy, collision };
 };
 
@@ -290,7 +292,6 @@ Game_CharacterBase.prototype.isEvent = function() {
   return false;
 };
 
-Game_CharacterBase.prototype.onCollision = function() {
 Game_CharacterBase.prototype.getOverlapRatioWith = function(obj) {
   if (this.x1 > obj.x2 || obj.x1 > this.x2 || this.y1 > obj.y2 || obj.y1 > this.y2) return 0;
   const overlapObj = {
@@ -325,4 +326,8 @@ Game_CharacterBase.prototype.hitboxRadius = function() {
 
 Game_CharacterBase.prototype.updateSpatialMap = function() {
   if ($gameMap) $gameMap.spatialMapUpdateEntity(this);
+};
+
+// smart random collision
+Game_CharacterBase.prototype.resetEventRandomAutonomousMovement = function() {
 };
