@@ -22,12 +22,10 @@ Game_Player.prototype.executeMove = function(direction) {
 
 // now takes single character argument
 Game_Player.prototype.checkEventTriggerTouch = function(character) {
-  if (!$gameMap.isEventRunning()) {
+  if (!$gameMap.isEventRunning() && !this.isJumping()) {
       if (character.isEvent() && character.isTriggerIn([1, 2])) {
-          if (!this.isJumping() && character.isNormalPriority()) {
-              this.resetAutoMovement();
-              character.start();
-          }
+          this.resetAutoMovement();
+          character.start();
       }
   }
 };

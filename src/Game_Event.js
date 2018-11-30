@@ -34,12 +34,10 @@ Game_Event.prototype.setupPageSettings = function() {
 
 // now takes single character argument
 Game_Event.prototype.checkEventTriggerTouch = function(character) {
-  if (!$gameMap.isEventRunning()) {
-      if (this._trigger === 2 && character === $gamePlayer) {
-          if (!this.isJumping() && this.isNormalPriority()) {
-              this.resetAutoMovement();
-              this.start();
-          }
+  if (!$gameMap.isEventRunning() && this._trigger === 2 && character === $gamePlayer) {
+      if (!this.isJumping() && this.isNormalPriority()) {
+          this.resetAutoMovement();
+          this.start();
       }
   }
 };
