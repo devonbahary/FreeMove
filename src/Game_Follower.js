@@ -6,10 +6,10 @@
 
 const _Game_Follower_refresh = Game_Follower.prototype.refresh;
 Game_Follower.prototype.refresh = function() {
-  _Game_Follower_refresh.call(this);
-  if (this.isVisible()) {
-    $gameMap.spatialMapUpdateEntity(this); // verify follower is in spatial map if not before
-  } else {
-    $gameMap.spatialMapRemoveEntity(this); // remove follower if was in spatial map
-  }
+    _Game_Follower_refresh.call(this);
+    if (this.isVisible()) {
+        $gameMap.spatialMapUpdateEntity(this); // verify follower is in spatial map if not before
+    } else {
+        $gameMap.spatialMapRemoveEntity(this); // remove follower if was in spatial map
+    }
 };

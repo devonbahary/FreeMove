@@ -6,9 +6,9 @@
 
 
 Game_Party.prototype.increaseSteps = function(steps = 1) {
-  this._steps += steps;
+    this._steps += steps;
 };
 
 Game_Party.prototype.steps = function() {
-  return Math.floor(this._steps);
+    return Math.floor(this._steps);
 };
