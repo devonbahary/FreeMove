@@ -124,9 +124,9 @@ Game_CharacterBase.prototype.applyAutoMove = function() {
 };
 
 Game_CharacterBase.prototype.dxThisFrame = function() {
-	const distance = this.distancePerFrame();
-	const scalar = Math.abs(this._autoDx) + Math.abs(this._autoDy);
-	return scalar ? distance * this._autoDx / scalar : 0;
+	  const distance = this.distancePerFrame();
+	  const scalar = Math.abs(this._autoDx) + Math.abs(this._autoDy);
+	  return scalar ? distance * this._autoDx / scalar : 0;
 };
 
 Game_CharacterBase.prototype.dyThisFrame = function() {
