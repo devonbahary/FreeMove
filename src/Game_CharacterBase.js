@@ -100,6 +100,7 @@ const _Game_CharacterBase_updateMove = Game_CharacterBase.prototype.updateMove;
 Game_CharacterBase.prototype.updateMove = function() {
 	this.applyAutoMove();
 	_Game_CharacterBase_updateMove.call(this);
+    this.increaseSteps();
 };
 
 Game_CharacterBase.prototype.applyAutoMove = function() {
@@ -214,6 +215,36 @@ Game_CharacterBase.prototype.getCollisionHere = function(collisions) {
 		this._triggerHereEvents.push(collision);
 	}
 	return collision;
+};
+
+// overwrite
+Game_CharacterBase.prototype.refreshBushDepth = function() {
+    if (this.isNormalPriority() && !this.isObjectCharacter() && this.isOnBush() && !this.isJumping()) {
+        // removed !this.isMoving() condition; should update bushDepth at every frame
+        this._bushDepth = 12;
+    } else {
+        this._bushDepth = 0;
+    }
+  };
+
+// overwriting to use rounded coordinates
+Game_CharacterBase.prototype.isOnLadder = function () {
+    return $gameMap.isLadder(Math.round(this.x), Math.round(this.y));
+};
+
+// overwriting to use rounded coordinates
+Game_CharacterBase.prototype.isOnBush = function () {
+    return $gameMap.isBush(Math.round(this.x), Math.round(this.y));
+};
+
+// overwriting to use rounded coordinates
+Game_CharacterBase.prototype.terrainTag = function () {
+    return $gameMap.terrainTag(Math.round(this.x), Math.round(this.y));
+};
+
+// overwriting to use rounded coordinates
+Game_CharacterBase.prototype.regionId = function () {
+    return $gameMap.regionId(Math.round(this.x), Math.round(this.y));
 };
 
 // includes self-check
