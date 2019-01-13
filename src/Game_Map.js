@@ -209,16 +209,15 @@ Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y, dir = null) 
         x = Math.max(0, Math.min(x, $gameMap.width() - 1));
         y = Math.max(0, Math.min(y, $gameMap.height() - 1));
     }
-    const thickness = this.tileBorderThickness();
     return this._tilemapCollisionGrid[y][x].map(obj => {
         if (!obj.isTileBorder) return obj;
-        if (obj.x2 - obj.x1 < 1) {
-            if (Number.isInteger(obj.x1)) return !isRight(dir) ? { x1: obj.x1 - thickness, x2: Math.round(obj.x2), y1: obj.y1, y2: obj.y2 } : obj;
-            if (Number.isInteger(obj.x2)) return !isLeft(dir) ? { x1: Math.round(obj.x1), x2: obj.x2 + thickness, y1: obj.y1, y2: obj.y2 } : obj;
-        } else if (obj.y2 - obj.y1 < 1) {
-            if (Number.isInteger(obj.y1)) return !isDown(dir) ? { x1: obj.x1, x2: obj.x2, y1: obj.y1 - thickness, y2: Math.round(obj.y2) } : obj;
-            if (Number.isInteger(obj.y2)) return !isUp(dir) ? { x1: obj.x1, x2: obj.x2, y1: Math.round(obj.y2), y2: obj.y2 + thickness } : obj;
-        }
+        return {
+            ...obj,
+            x1: Math.round(obj.x1),
+            x2: Math.round(obj.x2),
+            y1: Math.round(obj.y1),
+            y2: Math.round(obj.y2)
+        };
     });
 };
 
