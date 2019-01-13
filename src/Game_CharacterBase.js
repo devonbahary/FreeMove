@@ -152,9 +152,9 @@ Game_CharacterBase.prototype.truncateDxByCollision = function(collisions, dx) {
 	// get collidable in-path objects
 	const nearestCollisions = collisions
 		.filter(obj => (
-		this.canCollideWith(obj) && // through-, debug-, priority-check
-		!(obj.y2 <= this.y1 || this.y2 <= obj.y1) && // y-align check
-		(dx > 0 ? obj.x1 >= this.x2 : obj.x2 <= this.x1) // in-path check
+            this.canCollideWith(obj) && // through-, debug-, priority-check
+            !(obj.y2 <= this.y1 || this.y2 <= obj.y1) && // y-align check
+            (dx > 0 ? obj.x1 >= this.x2 : obj.x2 <= this.x1) // in-path check
 		))
 		.sort((a, b) => dx > 0 ? a.x1 - b.x1 : b.x2 - a.x2);
 
