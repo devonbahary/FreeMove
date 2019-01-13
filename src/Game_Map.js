@@ -199,7 +199,7 @@ Game_Map.prototype.getTilemapCollisionGrid = function(tilemapCollisionObjects) {
     return tilemapCollisionGrid;
 };
 
-Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y, dir = null) {
+Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y) {
     if (!$gameMap.isValid(x, y)) {
         x = Math.max(0, Math.min(x, $gameMap.width() - 1));
         y = Math.max(0, Math.min(y, $gameMap.height() - 1));
@@ -207,20 +207,20 @@ Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y, dir = null) 
     return this._tilemapCollisionGrid[y][x];
 };
 
-Game_Map.prototype.tilemapCollisionObjectsInBoundingBox = function(minX, maxX, minY, maxY, dir = null) {
+Game_Map.prototype.tilemapCollisionObjectsInBoundingBox = function(minX, maxX, minY, maxY) {
     let collisionObjects = [];
     for (let x = Math.floor(minX); x <= Math.floor(maxX); x++) {
         for (let y = Math.floor(minY); y <= Math.floor(maxY); y++) {
-            collisionObjects = [ ...collisionObjects, ...this.getTilemapCollisionObjectsAtPos(x, y, dir) ]; 
+            collisionObjects = [ ...collisionObjects, ...this.getTilemapCollisionObjectsAtPos(x, y) ]; 
         }
     }
     return collisionObjects;
 };
 
-Game_Map.prototype.collisionsInBoundingBox = function(minX, maxX, minY, maxY, dir = null) {
+Game_Map.prototype.collisionsInBoundingBox = function(minX, maxX, minY, maxY) {
     return [
         ...this.spatialMapEntitiesInBoundingBox(minX, maxX, minY, maxY),
-        ...this.tilemapCollisionObjectsInBoundingBox(minX, maxX, minY, maxY, dir)
+        ...this.tilemapCollisionObjectsInBoundingBox(minX, maxX, minY, maxY)
     ];
 };
 

@@ -138,13 +138,12 @@ Game_CharacterBase.prototype.dyThisFrame = function() {
 	return scalar ? distance * this._autoDy / scalar : 0;
 };
 
-Game_CharacterBase.prototype.getCollisionsForMovement = function(dx, dy) {
-	const dir = dirFromDxDy(dx, dy);
-	const minX = dx === 0 ? this.x1 : Math.min(this.x1, this.x1 + dx);
-	const maxX = dx === 0 ? this.x2 : Math.max(this.x2, this.x2 + dx);
-	const minY = dy === 0 ? this.y1 : Math.min(this.y1, this.y1 + dy);
-	const maxY = dy === 0 ? this.y2 : Math.max(this.y2, this.y2 + dy);
-	return $gameMap.collisionsInBoundingBox(minX, maxX, minY, maxY, dir);
+Game_CharacterBase.prototype.getCollisionsForMovement = function (dx, dy) {
+    const minX = dx === 0 ? this.x1 : Math.min(this.x1, this.x1 + dx);
+    const maxX = dx === 0 ? this.x2 : Math.max(this.x2, this.x2 + dx);
+    const minY = dy === 0 ? this.y1 : Math.min(this.y1, this.y1 + dy);
+    const maxY = dy === 0 ? this.y2 : Math.max(this.y2, this.y2 + dy);
+    return $gameMap.collisionsInBoundingBox(minX, maxX, minY, maxY);
 };
 
 Game_CharacterBase.prototype.truncateDxByCollision = function(collisions, dx) {
