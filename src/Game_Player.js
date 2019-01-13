@@ -57,7 +57,7 @@ Game_Player.prototype.updateNonmoving = function(wasMoving) {
 };
 // now takes single character argument
 Game_Player.prototype.checkEventTriggerTouch = function(character) {
-    if (!$gameMap.isEventRunning() && !this.isJumping()) {
+    if (this.canStartLocalEvents() && !$gameMap.isEventRunning() && !this.isJumping()) {
         if (character.isEvent() && character.isTriggerIn([1, 2])) {
             this.resetAutoMovement();
             character.start();
