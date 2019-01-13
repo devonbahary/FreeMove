@@ -5,9 +5,9 @@
 // determinants and map scrolling functions.
 
 
-Game_Player.prototype.progressAutoMove = function(dx, dy) {
+Game_Player.prototype.updateAutoMove = function(dx, dy, updateByActualDistance = false) {
     if (dx || dy) $gameParty.increaseSteps(Math.abs(dx) + Math.abs(dy));
-    Game_Character.prototype.progressAutoMove.call(this, dx, dy);
+    Game_Character.prototype.updateAutoMove.call(this, dx, dy, updateByActualDistance);
 };
 
 // overwritten

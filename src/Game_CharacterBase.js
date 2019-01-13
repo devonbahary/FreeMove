@@ -119,7 +119,10 @@ Game_CharacterBase.prototype.applyAutoMove = function() {
 	}
 	({ dy, collision } = this.truncateDyByCollision(collisions, dy));
 	this._y = this._y + dy;
-	if (collision) this.checkEventTriggerTouch(collision);
+	if (collision) {
+        this.checkEventTriggerTouch(collision);
+        if (!wasEventRunning && $gameMap.isEventRunning()) return;
+    }
 	this._triggerHereEvents = this._triggerHereEvents.filter(event => this.getOverlapRatioWith(event) > 0);
 };
 
@@ -230,12 +233,12 @@ Game_CharacterBase.prototype.canTriggerObjHere = function(obj) {
  	return obj !== this && obj.isEvent && obj.isEvent() && !obj.isNormalPriority() && this.getOverlapRatioWith(obj) > Game_CharacterBase.TRIGGER_HERE_OVERLAP_THRESHOLD;
 };
 
-Game_CharacterBase.prototype.updateAutoMove = function(dx, dy) {
-  	this.progressAutoMove(this.dxThisFrame(), this.dyThisFrame());
-};
-
-Game_CharacterBase.prototype.progressAutoMove = function(dx, dy) {
-	if (this._autoDx) {
+Game_CharacterBase.prototype.updateAutoMove = function(dx, dy, updateByActualDistance = false) {
+    if (!updateByActualDistance) {
+        dx = this.dxThisFrame();
+        dy = this.dyThisFrame();
+    }
+    if (this._autoDx) {
 		if (Math.sign(this._autoDx) !== Math.sign(this._autoDx - dx)) this._autoDx = 0;
 		else this._autoDx -= dx;
 		if (Math.floor4(this._autoDx) === 0) this._autoDx = 0;

@@ -6,12 +6,8 @@
 const { isDown, isLeft, isRight, isUp } = require('./util');
 
 
-Game_Character.prototype.updateAutoMove = function(dx, dy) {
-	if (this._moveRoute && !this._moveRoute.skippable) {
-    	this.progressAutoMove(dx, dy);
-    } else {
-      	Game_CharacterBase.prototype.updateAutoMove.call(this, dx, dy);
-    }
+Game_Character.prototype.updateAutoMove = function(dx, dy, updateByActualDistance = false) {
+    Game_CharacterBase.prototype.updateAutoMove.call(this, dx, dy, this._moveRoute && !this._moveRoute.skippable);
 };
 
 Game_Character.prototype.moveRandom = function() {
