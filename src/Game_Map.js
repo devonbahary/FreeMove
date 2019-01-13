@@ -5,9 +5,6 @@
 // determination functions.
 
 const QTree = require('./Qtree');
-const { isDown, isLeft, isRight, isUp } = require('./util');
-
-Game_Map.TILE_BORDER_THICKNESS = 0.0001;
 
 
 // create new spatial map for each new map
@@ -173,17 +170,15 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
             Object.keys(tileProperties)
               .filter(dir => !tileProperties[dir])
               .forEach(dir => {
-                  const thickness = this.tileBorderThickness();
-                  const tileBorder = { isTileBorder: true };
                   switch(Number(dir)) {
                       case 2:
-                          return collisionObjects.push({ ...tileBorder, x1: x, x2: x + 1, y1: y + 1 - thickness, y2: y + 1});
+                          return collisionObjects.push({ x1: x, x2: x + 1, y1: y + 1, y2: y + 1 });
                       case 4:
-                          return collisionObjects.push({ ...tileBorder, x1: x, x2: x + thickness, y1: y, y2: y + 1 });
+                          return collisionObjects.push({ x1: x, x2: x, y1: y, y2: y + 1 });
                       case 6:
-                          return collisionObjects.push({ ...tileBorder, x1: x + 1 - thickness, x2: x + 1, y1: y, y2: y + 1 });
+                          return collisionObjects.push({ x1: x + 1, x2: x + 1, y1: y, y2: y + 1 });
                       case 8:
-                          return collisionObjects.push({ ...tileBorder, x1: x, x2: x + 1, y1: y, y2: y + thickness});
+                          return collisionObjects.push({ x1: x, x2: x + 1, y1: y, y2: y });
                   }
               });
         }
@@ -197,7 +192,7 @@ Game_Map.prototype.getTilemapCollisionGrid = function(tilemapCollisionObjects) {
     for (let y = 0; y < $gameMap.height(); y++) {
         tilemapCollisionGrid[y] = {};
         for (let x = 0; x < $gameMap.width(); x++) {
-            const overlappingCollisionObjects = tilemapCollisionObjects.filter(object => object.x1 < x + 1 && object.x2 > x && object.y1 < y + 1 && object.y2 > y);
+            const overlappingCollisionObjects = tilemapCollisionObjects.filter(object => object.x1 <= x + 1 && object.x2 >= x && object.y1 <= y + 1 && object.y2 >= y);
             tilemapCollisionGrid[y][x] = overlappingCollisionObjects;
         }
     }
@@ -209,16 +204,7 @@ Game_Map.prototype.getTilemapCollisionObjectsAtPos = function(x, y, dir = null) 
         x = Math.max(0, Math.min(x, $gameMap.width() - 1));
         y = Math.max(0, Math.min(y, $gameMap.height() - 1));
     }
-    return this._tilemapCollisionGrid[y][x].map(obj => {
-        if (!obj.isTileBorder) return obj;
-        return {
-            ...obj,
-            x1: Math.round(obj.x1),
-            x2: Math.round(obj.x2),
-            y1: Math.round(obj.y1),
-            y2: Math.round(obj.y2)
-        };
-    });
+    return this._tilemapCollisionGrid[y][x];
 };
 
 Game_Map.prototype.tilemapCollisionObjectsInBoundingBox = function(minX, maxX, minY, maxY, dir = null) {
@@ -236,10 +222,6 @@ Game_Map.prototype.collisionsInBoundingBox = function(minX, maxX, minY, maxY, di
         ...this.spatialMapEntitiesInBoundingBox(minX, maxX, minY, maxY),
         ...this.tilemapCollisionObjectsInBoundingBox(minX, maxX, minY, maxY, dir)
     ];
-};
-
-Game_Map.prototype.tileBorderThickness = function() {
-    return Game_Map.TILE_BORDER_THICKNESS;
 };
 
 // update spatial map 
