@@ -55,6 +55,16 @@ Game_Player.prototype.updateNonmoving = function(wasMoving) {
         }
     }
 };
+
+Game_Player.prototype.checkEventTriggerHere = function(triggers) {
+    if (this.canStartLocalEvents()) {
+        const eligibleEvents = this._triggerHereEvents.filter(event => event.isTriggerIn(triggers) && !event.isNormalPriority());
+        if (eligibleEvents.length) {
+            eligibleEvents[0].start();
+        }
+    }
+};
+
 // now takes single character argument
 Game_Player.prototype.checkEventTriggerTouch = function(character) {
     if (this.canStartLocalEvents() && !$gameMap.isEventRunning() && !this.isJumping()) {
