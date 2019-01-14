@@ -354,7 +354,7 @@ Game_CharacterBase.prototype.hitbox = function() {
 // distance from center of characters used to calculate square hitbox
 Game_CharacterBase.prototype.hitboxRadius = function() {
   	if (this._hitboxRadius) return this._hitboxRadius;
-  	return this.isTile() || this.isObjectCharacter() ? 0.5 : this._hitboxRadius || Game_CharacterBase.DEFAULT_HITBOX_RADIUS;
+  	return !this._characterName || this.isTile() || this.isObjectCharacter() ? 0.5 : this._hitboxRadius || Game_CharacterBase.DEFAULT_HITBOX_RADIUS;
 };
 
 Game_CharacterBase.prototype.updateSpatialMap = function() {
