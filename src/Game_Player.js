@@ -106,7 +106,6 @@ Game_Player.prototype.checkEventTriggerThere = function(triggers) {
                 // check across counter tile
                 const x = Math.floor(this.x0) + (isLeft(dir) ? -1 : isRight(dir) ? 1 : 0);
                 const y = Math.floor(this.y0) + (isUp(dir) ? -1 : isDown(dir) ? 1 : 0);
-                console.log(`[${x}, ${y}] is counter:`, $gameMap.isCounter(x, y))
                 if ($gameMap.isCounter(x, y)) {
                     const acrossCounterEvents = eventsThere.filter(event => this.distanceBetween(event) <= 1.1);
                     if (acrossCounterEvents.length) {
