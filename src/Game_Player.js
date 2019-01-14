@@ -56,11 +56,15 @@ Game_Player.prototype.updateNonmoving = function(wasMoving) {
     }
 };
 
+// overwritten to take advantage of this._triggerHereEvents
 Game_Player.prototype.checkEventTriggerHere = function(triggers) {
     if (this.canStartLocalEvents()) {
-        const eligibleEvents = this._triggerHereEvents.filter(event => event.isTriggerIn(triggers) && !event.isNormalPriority());
-        if (eligibleEvents.length) {
-            eligibleEvents[0].start();
+        const eventsHere = this._triggerHereEvents.filter(event => event.isTriggerIn(triggers) && !event.isNormalPriority());
+        if (eventsHere.length) {
+            eventsHere[0].start();
+        }
+    }
+};
         }
     }
 };
