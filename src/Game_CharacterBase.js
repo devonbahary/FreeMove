@@ -13,12 +13,18 @@ Game_CharacterBase.TRIGGER_HERE_OVERLAP_THRESHOLD = 0.75;
 
 Object.defineProperties(Game_CharacterBase.prototype, {
 	id: { get: function() { return this._id          }, configurable: true },
+	// x, y best represent the old coordinate system, specifically describing the top-left corner of
+	// the character's location
 	x:  { get: function() { return Math.round4(this._x); }, configurable: true },
 	y:  { get: function() { return Math.round4(this._y); }, configurable: true },
+	// x1, x2, y1, y2 specify the actual character hitbox boundaries
 	x1: { get: function() { return this.hitbox().x1; }, configurable: true },
 	x2: { get: function() { return this.hitbox().x2; }, configurable: true },
 	y1: { get: function() { return this.hitbox().y1; }, configurable: true },
-	y2: { get: function() { return this.hitbox().y2; }, configurable: true }
+	y2: { get: function() { return this.hitbox().y2; }, configurable: true },
+	// x0, y0 represent the origin (center) of the character hitbox
+	x0: { get: function() { return this.x1 + this.hitboxRadius() }},
+	y0: { get: function() { return this.y1 + this.hitboxRadius() }}
 });
 
 /*
