@@ -4,6 +4,8 @@ module.exports = {
     isRight: dir => dir % 3 === 0,
     isUp: dir => dir > 6,
     isDown: dir => dir < 4,
+    isHorz: dir => dir === 4 || dir === 6,
+    isVert: dir => dir === 2 || dir === 8,
     dirFromDxDy: (dx, dy) => {
         let dir = dx < 0 ? 4 : dx > 0 ? 6 : null;
         if (dir) dir = dy > 0 ? dir - 3 : dy < 0 ? dir + 3 : dir;
