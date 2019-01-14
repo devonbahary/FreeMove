@@ -4,6 +4,8 @@
 // The game object class for the player. It contains event starting
 // determinants and map scrolling functions.
 
+const { isDown, isLeft, isRight, isUp, isHorz } = require('./util');
+
 
 const _Game_Player_initMembers = Game_Player.prototype.initMembers;
 Game_Player.prototype.initMembers = function() {
@@ -65,6 +67,53 @@ Game_Player.prototype.checkEventTriggerHere = function(triggers) {
         }
     }
 };
+
+Game_Player.prototype.checkEventTriggerThere = function(triggers) {
+    if (this.canStartLocalEvents()) {
+        var dir = this.direction();
+        const minX = this.x1 + (isLeft(dir) ? -2 : 0);
+        const maxX = this.x2 + (isRight(dir) ? 2 : 0);
+        const minY = this.y1 + (isUp(dir) ? -2 : 0);
+        const maxY = this.y2 + (isDown(dir) ? 2 : 0);
+
+        const eventsThere = $gameMap
+            .spatialMapEntitiesInBoundingBox(minX, maxX, minY, maxY)
+            .filter(entity =>
+                entity.isEvent() && 
+                entity.isTriggerIn([0, 1, 2]) &&
+                entity.isNormalPriority() &&
+                this.distanceBetween(entity) <= 1.1 &&
+                (isHorz(dir) ? (
+                    (entity.y1 + entity.hitboxRadius()) >= minY && (entity.y2 - entity.hitboxRadius()) <= maxY // y-align check
+                ) : (
+                    (entity.x1 + entity.hitboxRadius()) >= minX && (entity.x2 - entity.hitboxRadius()) <= maxX // x-align check
+                ))
+            )
+            .sort((a, b) => (
+                isHorz(dir) ? (
+                    isRight(dir) ? a.x1 - b.x1 : b.x2 - a.x2
+                ) : (
+                    isDown(dir) ? a.y1 - b.y1 : b.y2 - a.y2
+                )
+            ));
+        
+        if (eventsThere.length) {
+            // start adjacent event
+            const adjacentEvents = eventsThere.filter(event => this.distanceBetween(event) <= 0);
+            if (adjacentEvents.length) {
+                adjacentEvents[0].start();
+            } else {
+                // check across counter tile
+                const x = Math.floor(this.x0) + (isLeft(dir) ? -1 : isRight(dir) ? 1 : 0);
+                const y = Math.floor(this.y0) + (isUp(dir) ? -1 : isDown(dir) ? 1 : 0);
+                console.log(`[${x}, ${y}] is counter:`, $gameMap.isCounter(x, y))
+                if ($gameMap.isCounter(x, y)) {
+                    const acrossCounterEvents = eventsThere.filter(event => this.distanceBetween(event) <= 1.1);
+                    if (acrossCounterEvents.length) {
+                        acrossCounterEvents[0].start();
+                    }
+                }
+            }
         }
     }
 };
