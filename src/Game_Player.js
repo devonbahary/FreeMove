@@ -4,7 +4,7 @@
 // The game object class for the player. It contains event starting
 // determinants and map scrolling functions.
 
-const { isDown, isLeft, isRight, isUp, isHorz } = require('./util');
+const { isDown, isLeft, isRight, isUp, isHorz, isVert } = require('./util');
 
 
 const _Game_Player_initMembers = Game_Player.prototype.initMembers;
@@ -78,17 +78,23 @@ Game_Player.prototype.checkEventTriggerThere = function(triggers) {
 
         const eventsThere = $gameMap
             .spatialMapEntitiesInBoundingBox(minX, maxX, minY, maxY)
-            .filter(entity =>
-                entity.isEvent() && 
+            .filter(entity => (
+                entity.isEvent() &&
                 entity.isTriggerIn([0, 1, 2]) &&
                 entity.isNormalPriority() &&
-                this.distanceBetween(entity) <= 1.1 &&
-                (isHorz(dir) ? (
-                    (entity.y1 + entity.hitboxRadius()) >= minY && (entity.y2 - entity.hitboxRadius()) <= maxY // y-align check
-                ) : (
-                    (entity.x1 + entity.hitboxRadius()) >= minX && (entity.x2 - entity.hitboxRadius()) <= maxX // x-align check
-                ))
-            )
+                this.distanceBetween(entity) <= 1.1 && 
+                (
+                    isHorz(dir) ? (
+                        entity.y1 + entity.hitboxRadius() >= minY && 
+                        entity.y2 - entity.hitboxRadius() <= maxY && // y-align check
+                        (isLeft(dir) ? this.x0 > entity.x0 : this.x0 < entity.x0)
+                    ) : (
+                        entity.x1 + entity.hitboxRadius() >= minX && 
+                        entity.x2 - entity.hitboxRadius() <= maxX && // x-align check
+                        (isUp(dir) ? this.y0 > entity.y0 : this.y0 < entity.y0)
+                    )
+                )
+            ))
             .sort((a, b) => (
                 isHorz(dir) ? (
                     isRight(dir) ? a.x1 - b.x1 : b.x2 - a.x2
