@@ -10,6 +10,7 @@ Game_Character.prototype.updateAutoMove = function(dx, dy, updateByActualDistanc
     Game_CharacterBase.prototype.updateAutoMove.call(this, dx, dy, this._moveRoute && !this._moveRoute.skippable);
 };
 
+// overwrite
 Game_Character.prototype.moveRandom = function() {
 	let dir = 5;
 	while (dir === 5) dir = Math.ceil(Math.random() * 9);
@@ -19,14 +20,16 @@ Game_Character.prototype.moveRandom = function() {
 	this.autoMove(dx, dy);
 };
 
+// overwrite
 Game_Character.prototype.moveTowardCharacter = function(character) {
     let dx = this.dxFrom(character);
-	let dy = this.dyFrom(character);
+    let dy = this.dyFrom(character);
 	dx = Math.sign(dx) * Math.min(1, Math.abs(dx));
 	dy = Math.sign(dy) * Math.min(1, Math.abs(dy));
 	this.autoMove(dx, dy);
 };
 
+// overwrite
 Game_Character.prototype.moveAwayFromCharacter = function(character) {
     this.autoMove(Math.sign(this.x - character.x), Math.sign(this.y - character.y));
 };
