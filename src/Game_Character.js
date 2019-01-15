@@ -51,3 +51,33 @@ Game_Character.prototype.dyFrom = function(char) {
 Game_Character.prototype.distanceBetween = function(char) {
     return Math.round4(Math.sqrt(this.dxFrom(char) + this.dyFrom(char)));
 };
+
+Game_Character.prototype.hasLineOfSightTo = function(char) {
+    const minX = Math.min(this.x0, char.x0);
+    const maxX = Math.max(this.x0, char.x0);
+    const minY = Math.min(this.y0, char.y0);
+    const maxY = Math.max(this.y0, char.y0);
+    const collisionObjects = $gameMap.collisionsInBoundingBox(minX, maxX, minY, maxY)
+        .filter(obj => (
+            obj !== this && 
+            obj !== char &&
+            obj.x1 <= maxX &&
+            obj.x2 >= minX &&
+            obj.y1 <= maxY &&
+            obj.y2 >= minY
+        ));
+
+    const slope = this.x0 !== char.x0 ? (this.y0 - char.y0) / (this.x0 - char.x0) : null;
+    
+    if (slope === null) {
+        return !collisionObjects.some(obj => obj.x1 >= this.x0 && obj.x2 <= this.x0);
+    } else {
+        const b = this.y0 - slope * this.x0;
+        return !collisionObjects.some(obj => 
+            (obj.y1 <= slope * obj.x1 + b && obj.y2 >= slope * obj.x1) || // x1
+            (obj.y1 <= slope * obj.x2 + b && obj.y2 >= slope * obj.x2) || // x2
+            (obj.x1 <= (obj.y1 - b) / slope && obj.x2 >= (obj.y1 - b) / slope) || // y1
+            (obj.x1 <= (obj.y2 - b) / slope && obj.x2 >= (obj.y2 - b) / slope) // y2
+        );
+    }
+};
