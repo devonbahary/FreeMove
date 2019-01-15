@@ -1,8 +1,9 @@
 # FreeMove
 
 ### To-do
- - new movement with autoMove (`moveStraight()`)
- - change how autoMove is subtracted
+- followers
+- jump, etc
+- pathfinding
 
 ---
 ## Plugin Parameters
