@@ -12,7 +12,7 @@ Game_CharacterBase.TRIGGER_HERE_OVERLAP_THRESHOLD = 0.75;
 
 
 Object.defineProperties(Game_CharacterBase.prototype, {
-	id: { get: function() { return this._id          }, configurable: true },
+	id: { get: function() { return this._id; }, configurable: true },
 	// x, y best represent the old coordinate system, specifically describing the top-left corner of
 	// the character's location
 	x:  { get: function() { return Math.round4(this._x); }, configurable: true },
