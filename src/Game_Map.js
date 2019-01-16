@@ -12,6 +12,7 @@ const _Game_Map_setup = Game_Map.prototype.setup;
 Game_Map.prototype.setup = function(mapId) {
     _Game_Map_setup.call(this, mapId);
     this.initSpatialMap();
+    this.initTilemapProperty2DArray();
     this.initTilemapCollisionGrid();
 };
 
@@ -64,11 +65,11 @@ Game_Map.prototype.spatialMapEntitiesInBoundingBox = function(minX, maxX, minY, 
     return entities;
 };
 
-Game_Map.prototype.getTilemapCollisionObjects = function() {
-    // get grid tile properties
-    const tilemapProperty2DArray = [];
+// get grid tile properties
+Game_Map.prototype.initTilemapProperty2DArray = function() {
+    this._tilemapProperty2DArray = {};
     for (let y = 0; y < $gameMap.height(); y++) {
-        tilemapProperty2DArray.push([]);
+        this._tilemapProperty2DArray[y] = {};
         for (let x = 0; x <= $gameMap.width(); x++) {
             const tile = {
                 2: this.isValid(x, y + 1) && this.isPassable(x, y, 2),
@@ -76,17 +77,24 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
                 6: this.isValid(x + 1, y) && this.isPassable(x, y, 6),
                 8: this.isValid(x, y - 1) && this.isPassable(x, y, 8)
             };
-            tilemapProperty2DArray[y].push(tile);
+            this._tilemapProperty2DArray[y][x] = tile;
         }
     }
+};
 
+// get tile properties
+Game_Map.prototype.tileAt = function(x, y) {
+    return this._tilemapProperty2DArray[y][x];
+};
+
+Game_Map.prototype.getTilemapCollisionObjects = function() {
     // find entirely impassable tiles
     const collisionTiles2DArray = [];
     for (let y = 0; y < $gameMap.height(); y++) {
         collisionTiles2DArray.push([]);
         for (let x = 0; x <= $gameMap.width(); x++) {
             // 1 is a collision tile, 0 is a passable tile
-            collisionTiles2DArray[y].push(Object.values(tilemapProperty2DArray[y][x]).some(property => property) ? 0 : 1);
+            collisionTiles2DArray[y].push(Object.values(this._tilemapProperty2DArray[y][x]).some(property => property) ? 0 : 1);
         }
     }
 
@@ -164,7 +172,7 @@ Game_Map.prototype.getTilemapCollisionObjects = function() {
     // get tile border collision objects (one-way impassability)
     for (let y = 0; y < $gameMap.height(); y++) {
         for (let x = 0; x < $gameMap.width(); x++) {
-            const tileProperties = tilemapProperty2DArray[y][x];
+            const tileProperties = this._tilemapProperty2DArray[y][x];
             if (!Object.values(tileProperties).some(passability => passability)) continue;
 
             Object.keys(tileProperties)
